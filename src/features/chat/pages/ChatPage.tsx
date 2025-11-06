@@ -94,25 +94,64 @@ const ChatPage = () => {
     }
   }, []);
 
-  // Load from localStorage or mock on mount
+  // Load conversations only if user is authenticated
   useEffect(() => {
-    const stored = localStorage.getItem("conversations");
-    const seed = stored
-      ? (JSON.parse(stored) as Conversation[])
-      : mockConversations;
-    setConversations(seed);
-    if (seed.length > 0) {
-      setSelectedConversationId(seed[0].id);
-      setCurrentMessages(seed[0].messages);
-      setTools(seed[0].tools || {});
-      setMemoryEnabled(seed[0].memory?.enabled || false);
+    if (isAuthenticated) {
+      // Only load conversations if user is logged in
+      const stored = localStorage.getItem("conversations");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as Conversation[];
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setConversations(parsed);
+            // Only auto-select first conversation if it has messages
+            const firstConv = parsed[0];
+            if (firstConv.messages && firstConv.messages.length > 0) {
+              setSelectedConversationId(firstConv.id);
+              setCurrentMessages(firstConv.messages);
+              setTools(firstConv.tools || {});
+              setMemoryEnabled(firstConv.memory?.enabled || false);
+            } else {
+              // First conversation has no messages, show starter prompts
+              setSelectedConversationId(null);
+              setCurrentMessages([]);
+            }
+          } else {
+            // No conversations, show starter prompts
+            setConversations([]);
+            setSelectedConversationId(null);
+            setCurrentMessages([]);
+          }
+        } catch (error) {
+          console.error("Error parsing conversations:", error);
+          // Clear corrupted data
+          localStorage.removeItem("conversations");
+          setConversations([]);
+          setSelectedConversationId(null);
+          setCurrentMessages([]);
+        }
+      } else {
+        // No stored conversations, show starter prompts
+        setConversations([]);
+        setSelectedConversationId(null);
+        setCurrentMessages([]);
+      }
+    } else {
+      // User not authenticated - ALWAYS clear and show starter prompts
+      setConversations([]);
+      setSelectedConversationId(null);
+      setCurrentMessages([]);
+      setTools({ web: false, code: false, vision: false });
+      setMemoryEnabled(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
-  // Persist conversations
+  // Persist conversations (only if authenticated)
   useEffect(() => {
-    localStorage.setItem("conversations", JSON.stringify(conversations));
-  }, [conversations]);
+    if (isAuthenticated && conversations.length > 0) {
+      localStorage.setItem("conversations", JSON.stringify(conversations));
+    }
+  }, [conversations, isAuthenticated]);
 
   // Update messages when conversation changes
   useEffect(() => {
