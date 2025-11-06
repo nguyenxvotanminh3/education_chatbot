@@ -13,7 +13,6 @@ import NetworkErrorBanner from "../components/NetworkErrorBanner";
 import RateLimitModal from "../components/RateLimitModal";
 import ExportModal from "../components/ExportModal";
 import { Conversation, NewMessage, ConversationTools } from "../types";
-import { mockConversations } from "../data/mockData";
 import UpgradeModal from "../components/UpgradeModal";
 import prompts from "../data/prompts.json";
 import { getRandomResponse } from "../data/mockResponses";
