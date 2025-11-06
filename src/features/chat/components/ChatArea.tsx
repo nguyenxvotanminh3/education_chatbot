@@ -18,7 +18,6 @@ interface ChatAreaProps {
   onEdit?: (messageId: string, newContent: string) => void;
   onSelectVariant?: (messageId: string, variantId: string) => void;
   onFeedback?: (messageId: string, feedback: { like?: boolean; dislike?: boolean; note?: string; reason?: string }) => void;
-  onSuggestionClick?: (question: string) => void;
   userName?: string;
 }
 
@@ -36,7 +35,6 @@ const ChatArea = ({
   onEdit,
   onSelectVariant,
   onFeedback,
-  onSuggestionClick,
 }: ChatAreaProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
