@@ -24,7 +24,7 @@ const SettingsPage = () => {
   const userId = user?.email || user?.id || null;
 
   // Load settings from sessionStorage on mount
-  const [settings, setSettings] = useState<UserSettings>(() =>
+  const [settings] = useState<UserSettings>(() =>
     settingsService.getSettings(userId)
   );
 

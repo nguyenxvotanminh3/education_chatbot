@@ -4,6 +4,7 @@ export interface UserSession {
   schoolName?: string;
   grade?: string;
   subject?: string;
+  topic?: string;
   role?: 'student' | 'teacher';
   rememberSchool?: boolean;
 }

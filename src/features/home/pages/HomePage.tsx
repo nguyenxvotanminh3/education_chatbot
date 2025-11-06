@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../../core/store/hooks";
 import LoginPage from "../../auth/pages/LoginPage";
 import SignupPage from "../../auth/pages/SignupPage";

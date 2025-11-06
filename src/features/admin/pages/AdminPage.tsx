@@ -29,8 +29,8 @@ import { School as SchoolType, Document as DocumentType, AdminUser } from '../ty
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [schools, setSchools] = useState<SchoolType[]>(mockSchools);
-  const [documents, setDocuments] = useState<DocumentType[]>(mockDocuments);
+  const [schools] = useState<SchoolType[]>(mockSchools);
+  const [documents] = useState<DocumentType[]>(mockDocuments);
   const [users] = useState<AdminUser[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddSchoolOpen, setIsAddSchoolOpen] = useState(false);

@@ -18,7 +18,7 @@ import {
 import LoginPage from "../../auth/pages/LoginPage";
 import SignupPage from "../../auth/pages/SignupPage";
 import { cn } from "@/lib/utils";
-import { toggleDarkMode, setDarkMode } from "../../ui/store/uiSlice";
+import { toggleDarkMode } from "../../ui/store/uiSlice";
 import { settingsService } from "../../auth/services/settingsService";
 
 interface TopBarProps {
@@ -55,7 +55,6 @@ const TopBar = ({
     dispatch(toggleDarkMode());
     // Update settings to match the toggle
     const newIsDark = !isDark;
-    const settings = settingsService.getSettings(userId);
     // If user toggles, we assume they want to override system preference
     const newTheme = newIsDark ? 'dark' : 'light';
     settingsService.saveSettings({ theme: newTheme }, userId);

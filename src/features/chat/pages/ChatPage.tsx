@@ -55,7 +55,7 @@ const ChatPage = () => {
   const [showNetworkError, setShowNetworkError] = useState(false);
   const [showRateLimit, setShowRateLimit] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [networkErrorMessage, setNetworkErrorMessage] = useState("");
+  const [networkErrorMessage] = useState("");
   const [showSchoolPicker, setShowSchoolPicker] = useState(false);
   const [role, setRole] = useState<"student" | "teacher">("student");
   
@@ -355,19 +355,18 @@ const ChatPage = () => {
 
     // Prepare API call data with role and context
     // Note: In production, this would call the actual API
-    const apiData = {
-      userInput: content,
-      role: role, // Send role to backend
-      schoolId: session.schoolId,
-      schoolName: session.schoolName,
-      grade: session.grade,
-      subject: session.subject,
-      topic: session.topic,
-      previousChat: currentMessages.map((m) => ({
-        user: m.role === 'user' ? m.content : '',
-        gemini: m.role === 'assistant' ? m.contentMd : '',
-      })),
-    };
+    // const apiData = {
+    //   userInput: content,
+    //   role: role, // Send role to backend
+    //   schoolId: session.schoolId,
+    //   schoolName: session.schoolName,
+    //   grade: session.grade,
+    //   subject: session.subject,
+    //   previousChat: currentMessages.map((m) => ({
+    //     user: m.role === 'user' ? m.content : '',
+    //     gemini: m.role === 'assistant' ? m.contentMd : '',
+    //   })),
+    // };
 
     // TODO: Replace with actual API call when backend is ready
     // const response = await chatService.createChat(apiData);
@@ -510,7 +509,7 @@ const ChatPage = () => {
     toast.success("Message pinned");
   };
 
-  const handleQuote = (messageId: string, content: string) => {
+  const handleQuote = (_messageId: string, content: string) => {
     // This would insert quoted text into composer
     // For now, just show a toast
     toast.info(`Quoted: ${content.slice(0, 50)}...`);
@@ -826,7 +825,7 @@ const ChatPage = () => {
             open={commandPaletteOpen}
             onClose={() => setCommandPaletteOpen(false)}
             onModelChange={setModel}
-            onToggleTool={handleToggleTool}
+            onToggleTool={(tool: string) => handleToggleTool(tool as keyof ConversationTools)}
             onToggleMemory={handleToggleMemory}
             onNewChat={handleNewChat}
             onSettings={() => navigate("/settings")}
