@@ -27,16 +27,16 @@ export interface User {
 export interface Subscription {
   planId: string
   planName: string
-  startDate: Date
-  endDate: Date
+  startDate: Date | string
+  endDate: Date | string
   status: 'active' | 'expired' | 'cancelled'
 }
 
 export interface VoiceSubscription {
   planId: string
   planName: string
-  startDate: Date
-  endDate: Date
+  startDate: Date | string
+  endDate: Date | string
   status: 'active' | 'expired' | 'cancelled'
 }
 

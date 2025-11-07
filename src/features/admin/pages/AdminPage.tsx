@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,54 +9,220 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { 
-  LayoutDashboard, 
-  School, 
-  FileText, 
-  Users, 
-  Upload, 
-  Plus, 
-  Edit, 
+import { Textarea } from '@/components/ui/textarea';
+import {
+  LayoutDashboard,
+  School,
+  FileText,
+  Users,
+  Upload,
+  Plus,
+  Edit,
   Trash2,
   Search,
   BarChart3,
   BookOpen,
   GraduationCap,
-  MessageSquare,
-  HardDrive
+  HardDrive,
+  CreditCard,
+  RefreshCcw,
+  UserCircle,
+  ClipboardList,
+  Globe,
+  Settings2,
+  ShieldCheck,
+  Home,
 } from 'lucide-react';
-import { mockSchools, mockDocuments, mockUsers, mockStatistics, standards, subjects } from '../data/mockData';
-import { School as SchoolType, Document as DocumentType, AdminUser } from '../types';
+import {
+  mockSchools,
+  mockDocuments,
+  mockUsers,
+  mockStatistics,
+  mockOrders,
+  mockHomeContent,
+  standards,
+  subjects,
+} from '../data/mockData';
+import {
+  School as SchoolType,
+  Document as DocumentType,
+  AdminUser,
+  Order,
+  HomePageContent,
+} from '../types';
 
 const AdminPage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [schools] = useState<SchoolType[]>(mockSchools);
   const [documents] = useState<DocumentType[]>(mockDocuments);
   const [users] = useState<AdminUser[]>(mockUsers);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [orders] = useState<Order[]>(mockOrders);
+  const [homeContent, setHomeContent] = useState<HomePageContent>(mockHomeContent);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(mockUsers[0] ?? null);
+  const [schoolSearch, setSchoolSearch] = useState('');
+  const [documentSearch, setDocumentSearch] = useState('');
+  const [userSearch, setUserSearch] = useState('');
+  const [orderSearch, setOrderSearch] = useState('');
+  const [announcementsInput, setAnnouncementsInput] = useState(
+    mockHomeContent.announcements.join('\n')
+  );
   const [isAddSchoolOpen, setIsAddSchoolOpen] = useState(false);
   const [isUploadDocOpen, setIsUploadDocOpen] = useState(false);
 
   // Statistics
   const stats = mockStatistics;
 
+  const userIndex = useMemo(() => {
+    const map = new Map<string, AdminUser>();
+    users.forEach((user) => map.set(user.id, user));
+    return map;
+  }, [users]);
+
   // Filter functions
-  const filteredSchools = schools.filter(school =>
-    school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    school.country.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSchools = useMemo(
+    () =>
+      schools.filter((school) =>
+        [school.name, school.country, school.address]
+          .join(' ')
+          .toLowerCase()
+          .includes(schoolSearch.toLowerCase())
+      ),
+    [schools, schoolSearch]
   );
 
-  const filteredDocuments = documents.filter(doc =>
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.schoolName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.subject.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDocuments = useMemo(
+    () =>
+      documents.filter((doc) =>
+        [doc.name, doc.schoolName, doc.subject, doc.standard]
+          .join(' ')
+          .toLowerCase()
+          .includes(documentSearch.toLowerCase())
+      ),
+    [documents, documentSearch]
   );
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = useMemo(
+    () =>
+      users.filter((user) =>
+        [user.name, user.email, user.role, user.location, user.plan, user.subscriptionStatus]
+          .join(' ')
+          .toLowerCase()
+          .includes(userSearch.toLowerCase())
+      ),
+    [users, userSearch]
   );
+
+  const filteredOrders = useMemo(
+    () =>
+      orders.filter((order) =>
+        [order.id, order.userName, order.userEmail, order.plan, order.status]
+          .join(' ')
+          .toLowerCase()
+          .includes(orderSearch.toLowerCase())
+      ),
+    [orders, orderSearch]
+  );
+
+  const activePaidOrders = useMemo(
+    () => orders.filter((order) => order.status === 'paid' && order.isActive),
+    [orders]
+  );
+
+  const refundedAmount = useMemo(
+    () =>
+      orders
+        .filter((order) => order.status === 'refunded')
+        .reduce((total, order) => total + order.amount, 0),
+    [orders]
+  );
+
+  const pastDueSubscriptions = useMemo(
+    () => users.filter((user) => user.subscriptionStatus === 'past_due').length,
+    [users]
+  );
+
+  const trialingUsers = useMemo(
+    () => users.filter((user) => user.subscriptionStatus === 'trialing').length,
+    [users]
+  );
+
+  const locationSummary = useMemo(() => {
+    const counts = new Map<string, number>();
+    users.forEach((user) => {
+      const parts = user.location.split(',');
+      const country = parts[parts.length - 1].trim();
+      counts.set(country, (counts.get(country) ?? 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+  }, [users]);
+
+  const updateHeroContent = (field: keyof HomePageContent['hero'], value: string) => {
+    setHomeContent((prev) => ({
+      ...prev,
+      hero: {
+        ...prev.hero,
+        [field]: value,
+      },
+    }));
+  };
+
+  const updatePlaceholder = (
+    field: keyof HomePageContent['placeholders'],
+    value: string
+  ) => {
+    setHomeContent((prev) => ({
+      ...prev,
+      placeholders: {
+        ...prev.placeholders,
+        [field]: value,
+      },
+    }));
+  };
+
+  const updateHighlight = (
+    id: string,
+    field: 'title' | 'description',
+    value: string
+  ) => {
+    setHomeContent((prev) => ({
+      ...prev,
+      highlights: prev.highlights.map((highlight) =>
+        highlight.id === id
+          ? {
+              ...highlight,
+              [field]: value,
+            }
+          : highlight
+      ),
+    }));
+  };
+
+  const handleAnnouncementsChange = (value: string) => {
+    setAnnouncementsInput(value);
+    setHomeContent((prev) => ({
+      ...prev,
+      announcements: value
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean),
+    }));
+  };
+
+  const resetHomeContent = () => {
+    setHomeContent(mockHomeContent);
+    setAnnouncementsInput(mockHomeContent.announcements.join('\n'));
+  };
+
+  const handleOrderAction = (orderId: string, action: 'refund' | 'cancel') => {
+    console.log(`[Admin] ${action.toUpperCase()} requested for order ${orderId}`);
+  };
+
+  const handleSaveContent = () => {
+    console.log('[Admin] Home content saved', homeContent);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,6 +240,14 @@ const AdminPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => navigate('/home')}
+            >
+              <Home className="w-4 h-4" />
+              Back to Home
+            </Button>
               <Badge variant="outline" className="px-3 py-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                 System Online
@@ -86,22 +261,30 @@ const AdminPage = () => {
       <main className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Tabs Navigation */}
-          <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsList className="flex flex-wrap gap-2 mb-8">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <LayoutDashboard className="w-4 h-4" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="schools" className="flex items-center gap-2">
-              <School className="w-4 h-4" />
-              Schools
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4" />
+              Orders & Billing
             </TabsTrigger>
             <TabsTrigger value="documents" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Documents
             </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Users
+            <TabsTrigger value="schools" className="flex items-center gap-2">
+              <School className="w-4 h-4" />
+              Schools
+            </TabsTrigger>
+            <TabsTrigger value="content" className="flex items-center gap-2">
+              <Settings2 className="w-4 h-4" />
+              Home Content
             </TabsTrigger>
           </TabsList>
 
@@ -124,14 +307,12 @@ const AdminPage = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Schools</CardTitle>
-                  <School className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">MRR</CardTitle>
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalSchools}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Across multiple countries
-                  </p>
+                  <div className="text-2xl font-bold">${stats.monthlyRecurringRevenue.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">Monthly recurring revenue</p>
                 </CardContent>
               </Card>
 
@@ -150,14 +331,12 @@ const AdminPage = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Chats</CardTitle>
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">Active Subscriptions</CardTitle>
+                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalChats.toLocaleString()}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.activeToday} active today
-                  </p>
+                  <div className="text-2xl font-bold">{stats.activeSubscriptions.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">{activePaidOrders.length} active institutional orders</p>
                 </CardContent>
               </Card>
             </div>
@@ -241,6 +420,80 @@ const AdminPage = () => {
                 </CardContent>
               </Card>
             </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    Billing Snapshot
+                  </CardTitle>
+                  <CardDescription>Quick overview of billing health</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span>Refunded (last 30d)</span>
+                    <span className="font-semibold">${refundedAmount.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Past due accounts</span>
+                    <span className="font-semibold text-orange-500">{pastDueSubscriptions}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Trialing users</span>
+                    <span className="font-semibold">{trialingUsers}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Top Regions
+                  </CardTitle>
+                  <CardDescription>Active users by country</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    {locationSummary.map(([country, count]) => (
+                      <div key={country} className="flex items-center justify-between">
+                        <span>{country}</span>
+                        <span className="font-semibold">{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4" />
+                    Subscription Health
+                  </CardTitle>
+                  <CardDescription>Live insight into user plans</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span>Enterprise</span>
+                    <span className="font-semibold">{users.filter((u) => u.plan === 'Enterprise').length}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Pro</span>
+                    <span className="font-semibold">{users.filter((u) => u.plan === 'Pro').length}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Starter</span>
+                    <span className="font-semibold">{users.filter((u) => u.plan === 'Starter').length}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Free</span>
+                    <span className="font-semibold">{users.filter((u) => u.plan === 'Free').length}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Schools Tab */}
@@ -299,8 +552,8 @@ const AdminPage = () => {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                     <Input
                       placeholder="Search schools..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      value={schoolSearch}
+                      onChange={(e) => setSchoolSearch(e.target.value)}
                       className="pl-10"
                     />
                   </div>
@@ -466,8 +719,8 @@ const AdminPage = () => {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                     <Input
                       placeholder="Search documents..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      value={documentSearch}
+                      onChange={(e) => setDocumentSearch(e.target.value)}
                       className="pl-10"
                     />
                   </div>
@@ -538,82 +791,484 @@ const AdminPage = () => {
 
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <Card className="xl:col-span-2">
+                <CardHeader>
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <CardTitle>User Management</CardTitle>
+                      <CardDescription>View, audit, and manage every account</CardDescription>
+                    </div>
+                    <div className="relative w-full md:w-80">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        placeholder="Search by name, email, role or location..."
+                        value={userSearch}
+                        onChange={(e) => setUserSearch(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Location</TableHead>
+                          <TableHead>Plan</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Last Active</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredUsers.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                              No users found
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          filteredUsers.map((user) => (
+                            <TableRow
+                              key={user.id}
+                              className={`cursor-pointer transition-colors hover:bg-muted/50 ${
+                                selectedUser?.id === user.id ? 'bg-muted/70' : ''
+                              }`}
+                              onClick={() => setSelectedUser(user)}
+                            >
+                              <TableCell className="font-medium">{user.name}</TableCell>
+                              <TableCell>{user.email}</TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    user.role === 'admin'
+                                      ? 'destructive'
+                                      : user.role === 'teacher'
+                                      ? 'default'
+                                      : 'secondary'
+                                  }
+                                >
+                                  {user.role}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{user.location}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline">{user.plan}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={user.status === 'active' ? 'default' : 'secondary'}
+                                  className={user.status === 'active' ? 'bg-green-500' : ''}
+                                >
+                                  {user.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{user.lastActive}</TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserCircle className="w-5 h-5" />
+                    {selectedUser ? selectedUser.name : 'Select a user'}
+                  </CardTitle>
+                  <CardDescription>Profile, usage, and recent activity</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {selectedUser ? (
+                    <>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between">
+                          <span>Email</span>
+                          <span className="font-medium">{selectedUser.email}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Location</span>
+                          <span className="font-medium">{selectedUser.location}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>School / Grade</span>
+                          <span className="font-medium text-right">
+                            {selectedUser.schoolName || '—'}
+                            {selectedUser.standard ? ` • ${selectedUser.standard}` : ''}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Status</span>
+                          <div className="flex gap-2 items-center">
+                            <Badge
+                              variant={selectedUser.status === 'active' ? 'default' : 'secondary'}
+                              className={selectedUser.status === 'active' ? 'bg-green-500' : ''}
+                            >
+                              {selectedUser.status}
+                            </Badge>
+                            <Badge variant="outline" className="flex items-center gap-1">
+                              <ShieldCheck className="w-3 h-3" />
+                              {selectedUser.subscriptionStatus}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Billing</span>
+                          <span className="font-medium">
+                            {selectedUser.plan} · {selectedUser.billingCycle}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Total Spend</span>
+                          <span className="font-medium">${selectedUser.totalSpendUsd.toLocaleString()}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Usage snapshot
+                        </h4>
+                        <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                          <div className="rounded-lg border p-3">
+                            <p className="text-xs text-muted-foreground">Messages this month</p>
+                            <p className="text-lg font-semibold">{selectedUser.usage.messagesThisMonth}</p>
+                          </div>
+                          <div className="rounded-lg border p-3">
+                            <p className="text-xs text-muted-foreground">Documents uploaded</p>
+                            <p className="text-lg font-semibold">{selectedUser.usage.documentsUploaded}</p>
+                          </div>
+                          <div className="rounded-lg border p-3">
+                            <p className="text-xs text-muted-foreground">Storage used</p>
+                            <p className="text-lg font-semibold">{selectedUser.usage.storageUsedMb.toFixed(1)} MB</p>
+                          </div>
+                          <div className="rounded-lg border p-3">
+                            <p className="text-xs text-muted-foreground">Avg response time</p>
+                            <p className="text-lg font-semibold">{selectedUser.usage.avgResponseTimeMs} ms</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Recent activity
+                        </h4>
+                        <div className="mt-3 space-y-3 max-h-52 overflow-y-auto pr-1">
+                          {selectedUser.logs.map((log) => (
+                            <div key={log.id} className="border rounded-lg p-3 text-sm space-y-1">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium capitalize">{log.type}</span>
+                                <span className="text-xs text-muted-foreground">{log.timestamp}</span>
+                              </div>
+                              <p>{log.description}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {log.device ? `${log.device} · ` : ''}{log.location}
+                                {log.ipAddress ? ` · ${log.ipAddress}` : ''}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        <Button variant="outline" className="flex items-center gap-2">
+                          <Settings2 className="w-4 h-4" />
+                          Manage roles
+                        </Button>
+                        <Button variant="outline" className="flex items-center gap-2">
+                          <RefreshCcw className="w-4 h-4" />
+                          Reset password
+                        </Button>
+                        <Button variant="destructive">Deactivate user</Button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Select a user to inspect their profile.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Orders Tab */}
+          <TabsContent value="orders" className="space-y-6">
             <Card>
               <CardHeader>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <CardTitle>User Management</CardTitle>
-                    <CardDescription>View and manage system users</CardDescription>
+                    <CardTitle>Orders & Subscriptions</CardTitle>
+                    <CardDescription>Refund, cancel, and audit billing activity</CardDescription>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4">
-                  <div className="relative">
+                  <div className="relative w-full md:w-80">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                     <Input
-                      placeholder="Search users..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search orders, users, plans..."
+                      value={orderSearch}
+                      onChange={(e) => setOrderSearch(e.target.value)}
                       className="pl-10"
                     />
                   </div>
                 </div>
+              </CardHeader>
+              <CardContent>
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>School</TableHead>
-                        <TableHead>Grade</TableHead>
+                        <TableHead>Order</TableHead>
+                        <TableHead>User</TableHead>
+                        <TableHead>Plan</TableHead>
+                        <TableHead>Amount</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Last Active</TableHead>
+                        <TableHead>Renews</TableHead>
+                        <TableHead>Account</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredUsers.length === 0 ? (
+                      {filteredOrders.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                            No users found
+                          <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                            No orders found
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredUsers.map((user) => (
-                          <TableRow key={user.id}>
-                            <TableCell className="font-medium">{user.name}</TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant={
-                                  user.role === 'admin' ? 'destructive' : 
-                                  user.role === 'teacher' ? 'default' : 
-                                  'secondary'
-                                }
-                              >
-                                {user.role}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{user.schoolName || '-'}</TableCell>
-                            <TableCell>{user.standard || '-'}</TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant={user.status === 'active' ? 'default' : 'secondary'}
-                                className={user.status === 'active' ? 'bg-green-500' : ''}
-                              >
-                                {user.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{user.lastActive}</TableCell>
-                          </TableRow>
-                        ))
+                        filteredOrders.map((order) => {
+                          const orderUser = userIndex.get(order.userId);
+                          return (
+                            <TableRow key={order.id}>
+                              <TableCell className="font-medium">{order.id}</TableCell>
+                              <TableCell>
+                                <div className="space-y-1">
+                                  <div className="font-medium">{order.userName}</div>
+                                  <div className="text-xs text-muted-foreground">{order.userEmail}</div>
+                                </div>
+                              </TableCell>
+                              <TableCell>{order.plan}</TableCell>
+                              <TableCell>
+                                ${order.amount.toLocaleString()} {order.currency}
+                                {order.couponApplied ? (
+                                  <div className="text-xs text-muted-foreground">
+                                    Coupon: {order.couponApplied}
+                                  </div>
+                                ) : null}
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    order.status === 'paid'
+                                      ? 'default'
+                                      : order.status === 'pending'
+                                      ? 'secondary'
+                                      : 'destructive'
+                                  }
+                                >
+                                  {order.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-sm">
+                                  <div>{order.renewsAt}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {order.billingCycle} · {order.seats} seats
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {orderUser ? (
+                                  <div className="space-y-1 text-sm">
+                                    <Badge
+                                      variant={orderUser.status === 'active' ? 'default' : 'secondary'}
+                                      className={orderUser.status === 'active' ? 'bg-green-500' : ''}
+                                    >
+                                      {orderUser.status}
+                                    </Badge>
+                                    <div className="text-xs text-muted-foreground">
+                                      {orderUser.subscriptionStatus}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-muted-foreground">User archived</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleOrderAction(order.id, 'refund')}
+                                  >
+                                    Refund
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleOrderAction(order.id, 'cancel')}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
                       )}
                     </TableBody>
                   </Table>
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Content Tab */}
+          <TabsContent value="content" className="space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Hero Section</CardTitle>
+                  <CardDescription>Fine-tune the messaging shown on the home page hero</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hero-title">Title</Label>
+                    <Input
+                      id="hero-title"
+                      value={homeContent.hero.title}
+                      onChange={(e) => updateHeroContent('title', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hero-subtitle">Subtitle</Label>
+                    <Textarea
+                      id="hero-subtitle"
+                      value={homeContent.hero.subtitle}
+                      onChange={(e) => updateHeroContent('subtitle', e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="hero-primary-cta">Primary CTA</Label>
+                      <Input
+                        id="hero-primary-cta"
+                        value={homeContent.hero.primaryCta}
+                        onChange={(e) => updateHeroContent('primaryCta', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="hero-secondary-cta">Secondary CTA</Label>
+                      <Input
+                        id="hero-secondary-cta"
+                        value={homeContent.hero.secondaryCta}
+                        onChange={(e) => updateHeroContent('secondaryCta', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Placeholders & Prompts</CardTitle>
+                  <CardDescription>Keep UI hints up-to-date across experiences</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="placeholder-chat">Chat input placeholder</Label>
+                    <Input
+                      id="placeholder-chat"
+                      value={homeContent.placeholders.chatInput}
+                      onChange={(e) => updatePlaceholder('chatInput', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="placeholder-signup">Signup input placeholder</Label>
+                    <Input
+                      id="placeholder-signup"
+                      value={homeContent.placeholders.signupEmail}
+                      onChange={(e) => updatePlaceholder('signupEmail', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="placeholder-search">Search bar placeholder</Label>
+                    <Input
+                      id="placeholder-search"
+                      value={homeContent.placeholders.searchBar}
+                      onChange={(e) => updatePlaceholder('searchBar', e.target.value)}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="xl:col-span-2">
+                <CardHeader>
+                  <CardTitle>Feature Highlights</CardTitle>
+                  <CardDescription>Update the cards displayed under the hero section</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {homeContent.highlights.map((highlight) => (
+                    <div key={highlight.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-lg p-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`${highlight.id}-title`}>Title</Label>
+                        <Input
+                          id={`${highlight.id}-title`}
+                          value={highlight.title}
+                          onChange={(e) => updateHighlight(highlight.id, 'title', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2 md:col-span-1">
+                        <Label htmlFor={`${highlight.id}-description`}>Description</Label>
+                        <Textarea
+                          id={`${highlight.id}-description`}
+                          value={highlight.description}
+                          onChange={(e) => updateHighlight(highlight.id, 'description', e.target.value)}
+                          rows={3}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="xl:col-span-2">
+                <CardHeader>
+                  <CardTitle>Announcements</CardTitle>
+                  <CardDescription>Surface timely updates on the dashboard banner</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="announcements">Announcements (one per line)</Label>
+                    <Textarea
+                      id="announcements"
+                      value={announcementsInput}
+                      onChange={(e) => handleAnnouncementsChange(e.target.value)}
+                      rows={4}
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button className="flex items-center gap-2" onClick={handleSaveContent}>
+                      <Upload className="w-4 h-4" />
+                      Save content changes
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex items-center gap-2"
+                      onClick={resetHomeContent}
+                    >
+                      <RefreshCcw className="w-4 h-4" />
+                      Reset to defaults
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </main>

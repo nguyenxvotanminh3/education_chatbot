@@ -24,8 +24,8 @@ export const MOCK_USER: User = {
   subscription: {
     planId: 'free',
     planName: 'Free Plan',
-    startDate: new Date() as any, // Will be serialized as string in Redux
-    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) as any, // 1 year
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
     status: 'active',
   },
 }
@@ -78,8 +78,8 @@ const getMockUser = (email: string, name?: string): User => {
     subscription: {
       planId: 'free',
       planName: 'Free Plan',
-      startDate: new Date() as any,
-      endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) as any,
+      startDate: new Date().toISOString(),
+      endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
       status: 'active',
     },
   }

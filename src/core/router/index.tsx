@@ -16,6 +16,7 @@ const AdminPage = lazy(() => import("../../features/admin/pages/AdminPage"));
 const UpgradePage = lazy(() => import("../../features/auth/pages/UpgradePage"));
 const ProfilePage = lazy(() => import("../../features/auth/pages/ProfilePage"));
 const SettingsPage = lazy(() => import("../../features/auth/pages/SettingsPage"));
+const FaqPage = lazy(() => import("../../features/misc/pages/FaqPage"));
 
 export interface AppRoute {
   path: string;
@@ -63,6 +64,10 @@ export const routes: AppRoute[] = [
     path: "/settings",
     component: SettingsPage,
     protected: true,
+  },
+  {
+    path: "/faq",
+    component: FaqPage,
   },
   {
     path: "/prayers",

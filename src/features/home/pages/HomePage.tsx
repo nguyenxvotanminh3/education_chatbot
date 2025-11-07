@@ -25,7 +25,7 @@ const HomePage = () => {
       <header className="sticky top-0 z-10 bg-background/50 backdrop-blur-sm border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="font-semibold">
-            EDU<span className="text-primary">+</span>
+            Space<span className="text-primary">+</span>
           </div>
           <div className="flex items-center gap-4">
             {isAuthenticated && (
