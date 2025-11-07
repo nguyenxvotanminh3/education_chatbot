@@ -775,8 +775,8 @@ const ChatPage = () => {
           <div
             className={`fixed md:relative z-20 md:z-auto left-0 top-0 h-full transition-all duration-300 ease-out ${
               isSidebarCollapsed
-                ? "w-14 md:w-16 -translate-x-full md:translate-x-0"
-                : "w-80 translate-x-0"
+                ? "w-[72px] -translate-x-full md:translate-x-0"
+                : "w-[280px] translate-x-0"
             }`}
           >
             <Sidebar

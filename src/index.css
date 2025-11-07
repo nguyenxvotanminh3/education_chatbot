@@ -121,6 +121,23 @@ body {
   transform: scale(1.02);
 }
 
+.chatgpt-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chatgpt-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chatgpt-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+}
+
+.chatgpt-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 /* Smooth slide transitions */
 .slide-enter {
   animation: slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
