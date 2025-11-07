@@ -73,7 +73,7 @@ const SignupPage = ({
     try {
       const { confirmPassword, ...signupData } = formData;
       // Mock signup (no API call)
-      const result = await dispatch(signup(signupData)).unwrap();
+      await dispatch(signup(signupData)).unwrap();
       toast.success("Signup successful!");
       
       // Auto-login after signup

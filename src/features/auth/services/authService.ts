@@ -1,6 +1,6 @@
 import apiClient from '../../../core/api/axios'
 import type { User, LoginCredentials, SignupData, AuthResponse } from '../types'
-import { mockLogin, mockGetMe, MOCK_CREDENTIALS, MOCK_USER } from '../data/mockAuth'
+import { mockLogin, mockGetMe, MOCK_CREDENTIALS } from '../data/mockAuth'
 
 // Check if we should use mock mode (when API_URL is not set or explicitly enabled)
 const USE_MOCK_MODE =
