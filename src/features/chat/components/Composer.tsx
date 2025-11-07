@@ -136,6 +136,11 @@ const Composer = ({
   const maxTokens = 4000;
   const tokenPercentage = (tokenCount / maxTokens) * 100;
 
+  // Dynamic placeholder based on role
+  const roleBasedPlaceholder = role === "student" 
+    ? (placeholder === "Message..." ? "Ask a question or request help..." : placeholder)
+    : (placeholder === "Message..." ? "Create lesson plans, quizzes, or teaching materials..." : placeholder);
+
   return (
     <div className="bg-background/50 backdrop-blur-sm relative">
       {/* Context Chips */}
@@ -219,7 +224,7 @@ const Composer = ({
               onClick={onNewChat}
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full border border-ring bg-background hover:bg-muted shrink-0"
+              className="h-8 w-8 rounded-full border border-border bg-background hover:bg-muted shrink-0 focus:outline-none focus:ring-0 focus-visible:ring-0"
               aria-label="New chat"
             >
               <svg
@@ -246,10 +251,10 @@ const Composer = ({
               onKeyDown={handleKeyDown}
               onCompositionStart={handleCompositionStart}
               onCompositionEnd={handleCompositionEnd}
-              placeholder={placeholder}
+              placeholder={roleBasedPlaceholder}
               disabled={disabled || isStreaming}
               rows={1}
-              className={`w-full ${compact ? 'px-3 py-3 pr-48' : 'px-4 py-5 pr-52'} bg-muted/50 border border-border rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed max-h-[320px] overflow-y-auto transition-all`}
+              className={`w-full ${compact ? 'px-3 py-3 pr-48' : 'px-4 py-5 pr-52'} bg-muted/50 border border-border rounded-2xl resize-none focus:outline-none focus:ring-0 focus:border-border disabled:opacity-50 disabled:cursor-not-allowed max-h-[320px] overflow-y-auto transition-all`}
               style={{ minHeight: compact ? "56px" : "112px", height: compact && !input.trim() ? "56px" : "auto" }}
             />
             {/* Left dock: camera, attach, and school chip pinned to bottom-left - hidden when compact */}
@@ -258,7 +263,7 @@ const Composer = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full border border-ring bg-background hover:bg-muted"
+                  className="h-8 w-8 rounded-full border border-border bg-background hover:bg-muted focus:outline-none focus:ring-0 focus-visible:ring-0"
                   aria-label="Camera"
                 >
                   <svg
@@ -279,7 +284,7 @@ const Composer = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full border border-ring bg-background hover:bg-muted"
+                  className="h-8 w-8 rounded-full border border-border bg-background hover:bg-muted focus:outline-none focus:ring-0 focus-visible:ring-0"
                   aria-label="Attach"
                 >
                   <svg
@@ -303,66 +308,140 @@ const Composer = ({
               </div>
             )}
 
-            {/* Inline controls pinned to center-right inside input */}
-            <div className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2`}>
-              {/* Role single-toggle switch */}
-              <button
-                type="button"
-                onClick={() => handleRoleChange(role === "student" ? "teacher" : "student")}
-                className={`relative h-8 w-14 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 ${
-                  role === "student" ? "bg-violet-600" : "bg-violet-400"
-                }`}
-                role="switch"
-                aria-checked={role === "student"}
-                aria-label="Toggle role"
-              >
-                <span
-                  className={`absolute top-1 left-1 h-6 w-6 rounded-full bg-white shadow transition-transform ${
-                    role === "student" ? "translate-x-6" : "translate-x-0"
-                  }`}
-                />
-              </button>
-              <span className="ml-1.5 text-xs font-medium text-muted-foreground leading-none self-center">
-                {role === "student" ? "Student" : "Teacher"}
-              </span>
+            {/* Inline controls - center when compact, bottom-right when normal */}
+            {compact ? (
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                {/* Role toggle button with sliding background */}
+                <button
+                  type="button"
+                  onClick={() => handleRoleChange(role === "student" ? "teacher" : "student")}
+                  className="relative px-1 py-1 rounded-md bg-muted/50 border border-border hover:bg-muted transition-colors focus:outline-none focus:ring-0 text-[10px] font-medium leading-tight overflow-hidden"
+                  aria-label="Toggle role"
+                >
+                  {/* Sliding background */}
+                  <span
+                    className={`absolute inset-y-1 rounded transition-all duration-300 ease-in-out bg-black ${
+                      role === "student" ? "left-1 right-1/2" : "left-1/2 right-1"
+                    }`}
+                  />
+                  <div className="relative flex items-center gap-1">
+                    <span className={`px-2 py-0.5 rounded transition-colors duration-300 ${
+                      role === "student" ? "text-white font-semibold" : "text-muted-foreground"
+                    }`}>
+                      Student
+                    </span>
+                    <span className={`px-2 py-0.5 rounded transition-colors duration-300 ${
+                      role === "teacher" ? "text-white font-semibold" : "text-muted-foreground"
+                    }`}>
+                      Teacher
+                    </span>
+                  </div>
+                </button>
 
-              {/* Send/Stop button inside input */}
-              {isStreaming && onStop ? (
-                <Button
-                  onClick={onStop}
-                  variant="destructive"
-                  size="icon"
-                  className="h-9 w-9 rounded-full"
-                  aria-label="Stop generating"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
+                {/* Send/Stop button inside input */}
+                {isStreaming && onStop ? (
+                  <Button
+                    onClick={onStop}
+                    variant="destructive"
+                    size="icon"
+                    className="h-9 w-9 rounded-full"
+                    aria-label="Stop generating"
                   >
-                    <path d="M6 6h12v12H6z" />
-                  </svg>
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleSend}
-                  disabled={!hasAnyVisibleCharacter || disabled}
-                  size="icon"
-                  className="h-9 w-9 rounded-lg bg-black text-white hover:bg-black/90 disabled:opacity-50"
-                  aria-label="Send message"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M6 6h12v12H6z" />
+                    </svg>
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSend}
+                    disabled={!hasAnyVisibleCharacter || disabled}
+                    size="icon"
+                    className="h-9 w-9 rounded-lg bg-black text-white hover:bg-black/90 disabled:opacity-50"
+                    aria-label="Send message"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19V5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m5 12 7-7 7 7" />
-                  </svg>
-                </Button>
-              )}
-            </div>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19V5" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m5 12 7-7 7 7" />
+                    </svg>
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="absolute right-2 bottom-2 flex items-center gap-2">
+                {/* Role toggle button with sliding background */}
+                <button
+                  type="button"
+                  onClick={() => handleRoleChange(role === "student" ? "teacher" : "student")}
+                  className="relative px-1 py-1 rounded-md bg-muted/50 border border-border hover:bg-muted transition-colors focus:outline-none focus:ring-0 text-[10px] font-medium leading-tight overflow-hidden"
+                  aria-label="Toggle role"
+                >
+                  {/* Sliding background */}
+                  <span
+                    className={`absolute inset-y-1 rounded transition-all duration-300 ease-in-out bg-black ${
+                      role === "student" ? "left-1 right-1/2" : "left-1/2 right-1"
+                    }`}
+                  />
+                  <div className="relative flex items-center gap-1">
+                    <span className={`px-2 py-0.5 rounded transition-colors duration-300 ${
+                      role === "student" ? "text-white font-semibold" : "text-muted-foreground"
+                    }`}>
+                      Student
+                    </span>
+                    <span className={`px-2 py-0.5 rounded transition-colors duration-300 ${
+                      role === "teacher" ? "text-white font-semibold" : "text-muted-foreground"
+                    }`}>
+                      Teacher
+                    </span>
+                  </div>
+                </button>
+
+                {/* Send/Stop button inside input */}
+                {isStreaming && onStop ? (
+                  <Button
+                    onClick={onStop}
+                    variant="destructive"
+                    size="icon"
+                    className="h-9 w-9 rounded-full"
+                    aria-label="Stop generating"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M6 6h12v12H6z" />
+                    </svg>
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSend}
+                    disabled={!hasAnyVisibleCharacter || disabled}
+                    size="icon"
+                    className="h-9 w-9 rounded-lg bg-black text-white hover:bg-black/90 disabled:opacity-50"
+                    aria-label="Send message"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19V5" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m5 12 7-7 7 7" />
+                    </svg>
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

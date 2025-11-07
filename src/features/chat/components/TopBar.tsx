@@ -154,7 +154,7 @@ const TopBar = ({
         </div>
 
         {/* Right: Share + Settings or Login/Signup */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-4 shrink-0">
           {isAuthenticated ? (
             <>
               <button
@@ -244,13 +244,13 @@ const TopBar = ({
             <>
               <button
                 onClick={() => setShowLogin(true)}
-                className="h-9 px-3 inline-flex items-center rounded-md border border-border text-sm hover:bg-muted"
+                className="h-9 px-4 inline-flex items-center rounded-md bg-white text-black text-sm hover:bg-gray-100 whitespace-nowrap border border-border"
               >
                 Log in
               </button>
               <button
                 onClick={() => setShowSignup(true)}
-                className="h-9 px-3 inline-flex items-center rounded-md bg-primary text-primary-foreground text-sm hover:bg-primary/90"
+                className="h-9 px-4 inline-flex items-center rounded-md bg-black text-white text-sm hover:bg-gray-900 whitespace-nowrap border border-border"
               >
                 Sign up
               </button>

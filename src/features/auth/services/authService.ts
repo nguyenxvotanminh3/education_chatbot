@@ -1,11 +1,47 @@
 import apiClient from '../../../core/api/axios'
 import type { User, LoginCredentials, SignupData, AuthResponse } from '../types'
-import { mockLogin, mockGetMe, MOCK_CREDENTIALS } from '../data/mockAuth'
+import { mockLogin, mockGetMe, MOCK_CREDENTIALS, MOCK_USER } from '../data/mockAuth'
 
 // Check if we should use mock mode (when API_URL is not set or explicitly enabled)
 const USE_MOCK_MODE =
   !import.meta.env.VITE_API_URL ||
   import.meta.env.VITE_USE_MOCK_AUTH === 'true'
+
+// Mock signup function
+const mockSignup = async (data: SignupData): Promise<{ email: string }> => {
+  // Simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 500))
+  
+  // Store user data for later login
+  const storedUsers = localStorage.getItem('mock_users')
+  const users: Record<string, any> = storedUsers ? JSON.parse(storedUsers) : {}
+  
+  const newUser = {
+    _id: `mock_user_${Date.now()}`,
+    id: `mock_user_${Date.now()}`,
+    name: data.name,
+    nickname: data.name.split(' ')[0],
+    email: data.email,
+    password: data.password, // Store password for mock login
+    lang: 'vi',
+    profileImg: undefined,
+    phone: data.phone,
+    role: 'user',
+    isSubscribed: true,
+    subscription: {
+      planId: 'free',
+      planName: 'Free Plan',
+      startDate: new Date().toISOString(),
+      endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'active',
+    },
+  }
+  
+  users[data.email] = newUser
+  localStorage.setItem('mock_users', JSON.stringify(users))
+  
+  return { email: data.email }
+}
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
@@ -30,6 +66,12 @@ export const authService = {
   },
 
   async signup(data: SignupData): Promise<{ email: string }> {
+    // Use mock signup if in mock mode
+    if (USE_MOCK_MODE) {
+      return await mockSignup(data)
+    }
+
+    // Real API call
     const response = await apiClient.post('/auth/signup', data)
     return response.data
   },

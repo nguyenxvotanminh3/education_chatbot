@@ -41,7 +41,7 @@ const HomePage = () => {
               </div>
             )}
             {!isAuthenticated && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => dispatch(toggleDarkMode())}
                 className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-border text-sm hover:bg-muted"
@@ -52,13 +52,13 @@ const HomePage = () => {
               </button>
               <button
                 onClick={() => setShowLogin(true)}
-                className="h-9 px-3 inline-flex items-center rounded-md border border-border text-sm hover:bg-muted"
+                className="h-9 px-3 inline-flex items-center rounded-md bg-white text-black text-sm hover:bg-gray-100 whitespace-nowrap border border-border"
               >
                 Log in
               </button>
               <button
                 onClick={() => setShowSignup(true)}
-                className="h-9 px-3 inline-flex items-center rounded-md bg-primary text-primary-foreground text-sm hover:bg-primary/90"
+                className="h-9 px-3 inline-flex items-center rounded-md bg-black text-white text-sm hover:bg-gray-900 whitespace-nowrap border border-border"
               >
                 Sign up
               </button>

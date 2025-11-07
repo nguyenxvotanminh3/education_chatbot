@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../../core/store/hooks";
-import { signup } from "../store/authSlice";
+import { signup, login } from "../store/authSlice";
 import { toast } from "react-toastify";
 import {
   Dialog,
@@ -72,11 +72,23 @@ const SignupPage = ({
     setIsLoading(true);
     try {
       const { confirmPassword, ...signupData } = formData;
+      // Mock signup (no API call)
       const result = await dispatch(signup(signupData)).unwrap();
-      toast.success(
-        "Signup successful! Please check your email for verification."
-      );
-      navigate(`/ask-verification?email=${result.email}`);
+      toast.success("Signup successful!");
+      
+      // Auto-login after signup
+      try {
+        await dispatch(login({
+          email: signupData.email,
+          password: signupData.password,
+        })).unwrap();
+        toast.success("Login successful!");
+        // Navigate to chat page
+        navigate("/app");
+      } catch (loginErr: any) {
+        toast.error(loginErr || "Auto-login failed. Please login manually.");
+        navigate("/login");
+      }
     } catch (err: any) {
       toast.error(err || "Signup failed");
     } finally {

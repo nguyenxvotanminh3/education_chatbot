@@ -163,7 +163,7 @@ const Sidebar = ({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted text-muted-foreground">
-                  <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                  <div className="w-10 h-10 rounded-full bg-black dark:bg-gray-800 text-white flex items-center justify-center text-sm font-medium">
                     {userName.charAt(0).toUpperCase()}
                   </div>
                 </Button>
@@ -206,7 +206,7 @@ const Sidebar = ({
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold tracking-[0.08em] text-sidebar-foreground">
-            EDU<span className="text-primary">+</span>
+            EDU<span className="text-black dark:text-white">+</span>
           </h2>
           {onToggleCollapse && (
             <Button
@@ -237,7 +237,7 @@ const Sidebar = ({
         <div className="flex items-center gap-3">
           <Button
             onClick={onNewChat}
-            className="w-11 h-11 bg-primary hover:bg-primary/90 text-primary-foreground mb-3 rounded-full shadow-sm hover:shadow-md transition-shadow justify-center"
+            className="w-11 h-11 bg-black hover:bg-gray-900 text-white mb-3 rounded-full shadow-sm hover:shadow-md transition-shadow justify-center focus:outline-none focus:ring-0 focus-visible:ring-0"
           >
             <svg
               className="w-4 h-4"
@@ -272,7 +272,7 @@ const Sidebar = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search conversations..."
-              className="h-11 w-full rounded-full bg-muted/60 pl-9 pr-10 text-sm outline-none ring-1 ring-ring"
+              className="h-11 w-full rounded-full bg-muted/60 pl-9 pr-10 text-sm outline-none ring-1 ring-border focus:ring-border focus-visible:ring-border"
             />
             {searchQuery && (
               <button
@@ -304,7 +304,7 @@ const Sidebar = ({
           </span>
           {onDeleteConversation && conversations.length > 0 && (
             <button
-              className="text-xs text-primary hover:underline"
+              className="text-xs text-foreground hover:underline"
               onClick={() =>
                 conversations.forEach((c) => onDeleteConversation?.(c.id))
               }
@@ -355,7 +355,7 @@ const Sidebar = ({
                 onMouseLeave={() => setHoveredId(null)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 text-sm font-medium shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-black dark:bg-gray-800 text-white flex items-center justify-center shrink-0 text-sm font-medium shadow-sm">
                     💬
                   </div>
                   <div className="flex-1 min-w-0">
@@ -386,7 +386,7 @@ const Sidebar = ({
                           <svg
                             className={`w-4 h-4 ${
                               conv.pinned
-                                ? "text-primary"
+                                ? "text-black dark:text-white"
                                 : "text-muted-foreground"
                             }`}
                             fill="currentColor"
@@ -441,9 +441,9 @@ const Sidebar = ({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full justify-start py-6 rounded-2xl bg-muted/60 hover:bg-muted shadow-sm focus-visible:ring-1"
+                className="w-full justify-start py-6 rounded-2xl bg-muted/60 hover:bg-muted shadow-sm focus-visible:ring-0 focus:outline-none"
               >
-                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium mr-3 shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-black dark:bg-gray-800 text-white flex items-center justify-center text-sm font-medium mr-3 shadow-sm">
                   {userName.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 text-left min-w-0">

@@ -40,6 +40,58 @@ export const MOCK_ADMIN_USER: User = {
   role: 'admin',
 }
 
+// Helper to get or create mock user
+const getMockUser = (email: string, name?: string): User => {
+  // Check if user exists in localStorage (from signup)
+  const storedUsers = localStorage.getItem('mock_users')
+  if (storedUsers) {
+    try {
+      const users: Record<string, User> = JSON.parse(storedUsers)
+      if (users[email]) {
+        return users[email]
+      }
+    } catch (e) {
+      console.error('Error parsing mock users:', e)
+    }
+  }
+
+  // Check for known credentials
+  if (email === MOCK_CREDENTIALS.email) {
+    return MOCK_USER
+  }
+  if (email === MOCK_CREDENTIALS.adminEmail) {
+    return MOCK_ADMIN_USER
+  }
+
+  // Create new user for signup
+  const newUser: User = {
+    _id: `mock_user_${Date.now()}`,
+    id: `mock_user_${Date.now()}`,
+    name: name || email.split('@')[0],
+    nickname: name?.split(' ')[0] || email.split('@')[0],
+    email: email,
+    lang: 'vi',
+    profileImg: undefined,
+    phone: undefined,
+    role: 'user',
+    isSubscribed: true,
+    subscription: {
+      planId: 'free',
+      planName: 'Free Plan',
+      startDate: new Date() as any,
+      endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) as any,
+      status: 'active',
+    },
+  }
+
+  // Store new user
+  const users: Record<string, User> = storedUsers ? JSON.parse(storedUsers) : {}
+  users[email] = newUser
+  localStorage.setItem('mock_users', JSON.stringify(users))
+
+  return newUser
+}
+
 // Mock authentication function
 export const mockLogin = async (
   email: string,
@@ -48,7 +100,7 @@ export const mockLogin = async (
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 500))
 
-  // Check credentials
+  // Check known credentials first
   if (
     (email === MOCK_CREDENTIALS.email &&
       password === MOCK_CREDENTIALS.password) ||
@@ -56,16 +108,35 @@ export const mockLogin = async (
       password === MOCK_CREDENTIALS.adminPassword)
   ) {
     const isAdmin = email === MOCK_CREDENTIALS.adminEmail
-    const user = isAdmin ? MOCK_ADMIN_USER : MOCK_USER
-
     return {
-      user,
+      user: isAdmin ? MOCK_ADMIN_USER : MOCK_USER,
       accessToken: `mock_access_token_${Date.now()}`,
       refreshToken: `mock_refresh_token_${Date.now()}`,
     }
   }
 
+  // Check if user exists in localStorage (from signup)
+  const storedUsers = localStorage.getItem('mock_users')
+  if (storedUsers) {
+    try {
+      const users: Record<string, any> = JSON.parse(storedUsers)
+      const user = users[email]
+      if (user && user.password === password) {
+        // Remove password from user object before returning
+        const { password: _, ...userWithoutPassword } = user
+        return {
+          user: userWithoutPassword as User,
+          accessToken: `mock_access_token_${Date.now()}`,
+          refreshToken: `mock_refresh_token_${Date.now()}`,
+        }
+      }
+    } catch (e) {
+      console.error('Error parsing mock users:', e)
+    }
+  }
+
   throw new Error('Invalid email or password')
+
 }
 
 export const mockGetMe = async (): Promise<User> => {
@@ -79,6 +150,6 @@ export const mockGetMe = async (): Promise<User> => {
 
   // Return user based on token or default to regular user
   const email = localStorage.getItem('mock_user_email') || MOCK_CREDENTIALS.email
-  return email === MOCK_CREDENTIALS.adminEmail ? MOCK_ADMIN_USER : MOCK_USER
+  return getMockUser(email)
 }
 
