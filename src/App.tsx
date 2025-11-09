@@ -21,6 +21,7 @@ function AppContent() {
   const isInitializing = useAppSelector(
     (state) => state.auth?.isInitializing ?? true
   );
+  const isLoading = useAppSelector((state) => state.auth?.isLoading ?? false);
 
   useEffect(() => {
     dispatch(initializeAuth());
@@ -78,19 +79,53 @@ function AppContent() {
     <div className="App">
       <Suspense fallback={<LoadingScreen />}>
         <Routes>
-          {routes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={
-                route.protected && !isAuthenticated ? (
-                  <Navigate to="/login" replace />
-                ) : (
-                  <route.component />
-                )
+          {routes.map((route) => {
+            // Check if route requires authentication
+            if (route.protected && !isAuthenticated) {
+              return (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={<Navigate to="/login" replace />}
+                />
+              );
+            }
+
+            // Check if route requires admin role
+            if (route.adminOnly) {
+              // If user data is still loading, show loading screen
+              if (isAuthenticated && !user && isLoading) {
+                return (
+                  <Route
+                    key={route.path}
+                    path={route.path}
+                    element={<LoadingScreen />}
+                  />
+                );
               }
-            />
-          ))}
+              
+              // Check if user has admin role
+              const isAdmin = user?.role === "admin" || user?.role === "super_admin";
+              if (!isAdmin) {
+                return (
+                  <Route
+                    key={route.path}
+                    path={route.path}
+                    element={<Navigate to="/app" replace />}
+                  />
+                );
+              }
+            }
+
+            // Render the route normally
+            return (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={<route.component />}
+              />
+            );
+          })}
           <Route path="*" element={<Navigate to="/app" replace />} />
         </Routes>
       </Suspense>

@@ -45,24 +45,15 @@ const SpaceStarter: React.FC = () => {
       {/* Pastel radial mist overlays */}
       <div className="pointer-events-none absolute inset-0">
         {/* Blue left (extend toward center to blend) */}
-        <div className="absolute bottom-6 -left-24 w-[640px] h-[360px] rounded-full bg-[radial-gradient(closest-side,rgba(59,130,246,0.28),transparent_70%)] dark:bg-[radial-gradient(closest-side,rgba(59,130,246,0.24),transparent_70%)] blur-3xl"></div>
+        <div className="absolute bottom-6 -left-12 sm:-left-24 w-[320px] h-[180px] sm:w-[480px] sm:h-[270px] md:w-[640px] md:h-[360px] rounded-full bg-[radial-gradient(closest-side,rgba(59,130,246,0.28),transparent_70%)] dark:bg-[radial-gradient(closest-side,rgba(59,130,246,0.24),transparent_70%)] blur-3xl"></div>
         {/* Purple center (largest, sits behind as bridge) */}
-        <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-[760px] h-[420px] rounded-full bg-[radial-gradient(closest-side,rgba(139,92,246,0.28),transparent_70%)] dark:bg-[radial-gradient(closest-side,rgba(139,92,246,0.24),transparent_70%)] blur-3xl"></div>
+        <div className="absolute -top-14 sm:-top-20 md:-top-28 left-1/2 -translate-x-1/2 w-[380px] h-[210px] sm:w-[570px] sm:h-[315px] md:w-[760px] md:h-[420px] rounded-full bg-[radial-gradient(closest-side,rgba(139,92,246,0.28),transparent_70%)] dark:bg-[radial-gradient(closest-side,rgba(139,92,246,0.24),transparent_70%)] blur-3xl"></div>
         {/* Lavender bridge to smooth overlaps */}
-        <div
-          className="absolute rounded-full blur-3xl"
-          style={{
-            left: "48%",
-            top: "38%",
-            width: "820px",
-            height: "460px",
-            transform: "translate(-50%, -50%)",
-          }}
-        >
+        <div className="absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 w-[410px] h-[230px] sm:w-[615px] sm:h-[345px] md:w-[820px] md:h-[460px] rounded-full blur-3xl">
           <div className="w-full h-full rounded-full bg-[radial-gradient(closest-side,rgba(196,181,253,0.20),transparent_70%)] dark:bg-[radial-gradient(closest-side,rgba(196,181,253,0.18),transparent_70%)]"></div>
         </div>
         {/* Pink right (pull inward for blend) */}
-        <div className="absolute bottom-8 -right-12 w-[640px] h-[360px] rounded-full bg-[radial-gradient(closest-side,rgba(244,114,182,0.28),transparent_70%)] dark:bg-[radial-gradient(closest-side,rgba(244,114,182,0.24),transparent_70%)] blur-3xl"></div>
+        <div className="absolute bottom-8 -right-6 sm:-right-12 w-[320px] h-[180px] sm:w-[480px] sm:h-[270px] md:w-[640px] md:h-[360px] rounded-full bg-[radial-gradient(closest-side,rgba(244,114,182,0.28),transparent_70%)] dark:bg-[radial-gradient(closest-side,rgba(244,114,182,0.24),transparent_70%)] blur-3xl"></div>
       </div>
       <div className="relative p-2 sm:p-3">
         {/* <div className="flex items-center justify-between mb-1.5 sm:mb-2">
@@ -78,16 +69,16 @@ const SpaceStarter: React.FC = () => {
           {SPACES.map((space, idx) => (
             <div
               key={idx}
-              className="group rounded-lg bg-card/60 dark:bg-card/40 hover:bg-card/75 dark:hover:bg-card/55 transition-colors p-2.5 sm:p-3 flex gap-2 shadow-[0_1px_2px_rgba(0,0,0,.06)] dark:shadow-[0_1px_2px_rgba(0,0,0,.2)] text-left min-h-24"
+              className="group rounded-lg bg-card/60 dark:bg-card/40 hover:bg-card/75 dark:hover:bg-card/55 transition-colors p-2 sm:p-2.5 md:p-3 flex gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,.06)] dark:shadow-[0_1px_2px_rgba(0,0,0,.2)] text-left min-h-20 sm:min-h-24"
             >
-              <div className="text-2xl shrink-0 leading-none self-start">
+              <div className="text-xl sm:text-2xl shrink-0 leading-none self-start">
                 {space.icon}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-sm md:text-base font-semibold text-foreground mb-0.5">
+                <div className="text-xs sm:text-sm md:text-base font-semibold text-foreground mb-0.5">
                   {space.title}
                 </div>
-                <div className="text-xs md:text-sm text-foreground/80 leading-relaxed">
+                <div className="text-xs sm:text-xs md:text-sm text-foreground/80 leading-relaxed">
                   {space.description}
                 </div>
               </div>

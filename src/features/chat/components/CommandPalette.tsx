@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
@@ -304,7 +305,10 @@ const CommandPalette = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl p-0 gap-0">
+      <DialogContent className="sm:max-w-2xl p-0 gap-0" aria-describedby="command-palette-description">
+        <DialogDescription id="command-palette-description" className="sr-only">
+          Command palette for quick actions and navigation
+        </DialogDescription>
         {/* Search Input */}
         <div className="p-4 border-b border-border">
           <Input

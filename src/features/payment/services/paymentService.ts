@@ -22,6 +22,36 @@ export interface CreateSubscriptionResponse {
   };
 }
 
+export interface SubscriptionHistoryItem {
+  orderId: string;
+  user: {
+    name: string;
+    email: string;
+  };
+  plan: string;
+  amount: {
+    value: number;
+    currency: string;
+  };
+  status: string;
+  renews: {
+    date: string;
+    type: string;
+    seats: number;
+  };
+  accountStatus: string;
+  actions: string[];
+  subscriptionId: string;
+  createdAt: string;
+  startDate: string;
+  nextBillingDate: string;
+}
+
+export interface SubscriptionsHistoryResponse {
+  total: number;
+  subscriptions: SubscriptionHistoryItem[];
+}
+
 export const paymentService = {
   /**
    * Create a subscription for a plan
@@ -45,6 +75,14 @@ export const paymentService = {
    */
   async cancelSubscription(): Promise<{ success: boolean; message: string }> {
     const response = await apiClient.post("/payment/cancel");
+    return response.data;
+  },
+
+  /**
+   * Get all subscriptions history for the current user
+   */
+  async getSubscriptionsHistory(): Promise<SubscriptionsHistoryResponse> {
+    const response = await apiClient.get("/payment/subscriptions");
     return response.data;
   },
 };

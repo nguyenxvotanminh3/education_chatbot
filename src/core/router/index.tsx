@@ -116,10 +116,14 @@ export const routes: AppRoute[] = [
   {
     path: "/admin",
     component: AdminPage,
+    protected: true,
+    adminOnly: true,
   },
   {
     path: "/admin/*",
     component: AdminPage,
+    protected: true,
+    adminOnly: true,
   },
   {
     path: "/auth/google/callback",

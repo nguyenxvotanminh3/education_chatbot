@@ -1036,25 +1036,27 @@ const ChatPage = () => {
           {/* Context selectors removed as requested */}
 
           {/* Chat Messages */}
-          <ChatArea
-            messages={currentMessages}
-            conversationId={selectedConversationId || undefined}
-            isStreaming={isStreaming}
-            onCopy={handleCopy}
-            onShare={handleShare}
-            onRegenerate={handleRegenerate}
-            onLike={handleLike}
-            onContinue={handleContinue}
-            onEdit={handleEdit}
-            onSelectVariant={handleSelectVariant}
-            onFeedback={handleFeedback}
-            userName={userName}
-            isAuthenticated={isAuthenticated}
-          />
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+            <ChatArea
+              messages={currentMessages}
+              conversationId={selectedConversationId || undefined}
+              isStreaming={isStreaming}
+              onCopy={handleCopy}
+              onShare={handleShare}
+              onRegenerate={handleRegenerate}
+              onLike={handleLike}
+              onContinue={handleContinue}
+              onEdit={handleEdit}
+              onSelectVariant={handleSelectVariant}
+              onFeedback={handleFeedback}
+              userName={userName}
+              isAuthenticated={isAuthenticated}
+            />
+          </div>
 
           {/* Composer and bottom elements container */}
           <div
-            className="pb-20 md:pb-4"
+            className="flex-shrink-0 pb-4 sm:pb-6 md:pb-4"
             // style={{
             //   paddingBottom: "max(5rem, env(safe-area-inset-bottom, 1.25rem))",
             // }}

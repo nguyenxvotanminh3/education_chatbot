@@ -2,7 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getCookie } from "../utils/cookie";
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:3000/api",
+  baseURL: import.meta.env.VITE_BACKEND_URL || "/api",
   withCredentials: true, // Important: enables cookies (ci cookie for guest ID)
   headers: {
     "Content-Type": "application/json",
@@ -97,7 +97,7 @@ apiClient.interceptors.response.use(
         if (refreshTokenValue) {
           const refreshResponse = await axios.post(
             `${
-              import.meta.env.VITE_API_URL || "http://localhost:3000/api"
+              import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || "/api"
             }/auth/refresh`,
             {},
             { withCredentials: true }

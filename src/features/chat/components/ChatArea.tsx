@@ -56,42 +56,52 @@ const ChatArea = ({
   if (messages.length === 0) {
     return (
       <div
-        className={`flex flex-col items-center justify-start pt-6 ${
-          isAuthenticated ? "pb-0" : "pb-4"
-        } ${isAuthenticated ? "px-4" : "px-0"} text-center`}
+        ref={containerRef}
+        className="flex-1 overflow-y-auto min-h-0"
+        role="log"
+        aria-live="polite"
+        aria-label="Chat messages"
       >
-        {/* removed decorative icon above header */}
-
-        <img
-          src={cuteIcon}
-          alt="Cute assistant"
-          className="w-48 h-48 mb-1 mx-auto rounded-full"
-        />
         <div
-          className={`-mt-4 md:-mt-5 ${
-            isAuthenticated ? "mb-8" : "mb-1"
-          } leading-tight relative z-10`}
+          className={`flex flex-col items-center justify-start pt-3 sm:pt-4 md:pt-6 ${
+            isAuthenticated ? "pb-3 sm:pb-4" : "pb-4 sm:pb-5 md:pb-6"
+          } ${
+            isAuthenticated ? "px-3 sm:px-4" : "px-2 sm:px-3 md:px-4"
+          } text-center min-h-full w-full`}
         >
-          <p className="text-3xl md:text-4xl font-bold text-foreground">
-            {(() => {
-              const hour = new Date().getHours();
-              const partOfDay =
-                hour < 12 ? "Morning" : hour < 18 ? "Afternoon" : "Evening";
-              const name =
-                userName && userName !== "Guest" ? userName : "there";
-              return `Good ${partOfDay}, ${name}`;
-            })()}
-          </p>
-          <p className="text-3xl md:text-4xl font-bold text-foreground">
-            What's on <span className="gradient-text">your mind?</span>
-          </p>
-        </div>
+          {/* removed decorative icon above header */}
 
-        {!isAuthenticated && (
-          <div className="w-full mt-2">
-            <SpaceStarter />
+          <img
+            src={cuteIcon}
+            alt="Cute assistant"
+            className="w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48 mb-0.5 sm:mb-1 mx-auto rounded-full flex-shrink-0"
+          />
+          <div
+            className={`-mt-1.5 sm:-mt-2 md:-mt-4 lg:-mt-5 ${
+              isAuthenticated ? "mb-4 sm:mb-6 md:mb-8" : "mb-1.5 sm:mb-2 md:mb-4"
+            } leading-tight relative z-10 px-2 sm:px-3 md:px-4 w-full`}
+          >
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
+              {(() => {
+                const hour = new Date().getHours();
+                const partOfDay =
+                  hour < 12 ? "Morning" : hour < 18 ? "Afternoon" : "Evening";
+                const name =
+                  userName && userName !== "Guest" ? userName : "there";
+                return `Good ${partOfDay}, ${name}`;
+              })()}
+            </p>
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
+              What's on <span className="gradient-text">your mind?</span>
+            </p>
           </div>
-        )}
+
+          {!isAuthenticated && (
+            <div className="w-full mt-1.5 sm:mt-2 md:mt-3 px-1 sm:px-2 md:px-4">
+              <SpaceStarter />
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -99,7 +109,7 @@ const ChatArea = ({
   return (
     <div
       ref={containerRef}
-      className="flex-1 overflow-y-auto"
+      className="flex-1 overflow-y-auto min-h-0"
       role="log"
       aria-live="polite"
       aria-label="Chat messages"
