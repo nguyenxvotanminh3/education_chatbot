@@ -1,5 +1,6 @@
 import apiClient from "../../../core/api/axios";
 import axios from "axios";
+import { School } from "../types";
 
 export interface AdminSubscription {
   id: string;
@@ -309,7 +310,9 @@ export const adminService = {
   /**
    * Delete document from external API
    */
-  async deleteDocument(documentId: string): Promise<{ success: boolean; message?: string; [key: string]: any }> {
+  async deleteDocument(
+    documentId: string
+  ): Promise<{ success: boolean; message?: string; [key: string]: any }> {
     const response = await axios.delete(
       `http://66.116.199.129:8000/delete/${documentId}`
     );
@@ -317,21 +320,8 @@ export const adminService = {
   },
 };
 
-export interface School {
-  id: string;
-  name: string;
-  address?: string;
-  country?: string;
-  state?: string;
-  city?: string;
-  schoolBoard?: string;
-  languages?: string[];
-  category?: "government" | "private";
-  totalStudents: number;
-  totalTeachers: number;
-  createdAt: string;
-  updatedAt?: string;
-}
+// Re-export School type for backward compatibility
+export type { School } from "../types";
 
 export interface RolePrompt {
   id?: string;

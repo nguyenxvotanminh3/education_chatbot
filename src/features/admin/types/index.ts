@@ -1,11 +1,17 @@
 export interface School {
   id: string;
   name: string;
-  address: string;
-  country: string;
+  address?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  schoolBoard?: string;
+  languages?: string[];
+  category?: "government" | "private";
   totalStudents: number;
   totalTeachers: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Document {

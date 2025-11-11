@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { mockHomeContent } from "../data/mockData";
-import { Document as DocumentType, HomePageContent } from "../types";
+import { Document as DocumentType, HomePageContent, School } from "../types";
 import { AdminHeader } from "../components/AdminHeader";
 import { AdminTabs } from "../components/AdminTabs";
 import { AdminDashboard } from "../components/dashboard/AdminDashboard";
@@ -10,7 +10,7 @@ import { AdminOrders } from "../components/orders/AdminOrders";
 import { AdminDocuments } from "../components/documents/AdminDocuments";
 import { AdminSchools } from "../components/schools/AdminSchools";
 import { AdminContent } from "../components/content/AdminContent";
-import { adminService, School } from "../services/adminService";
+import { adminService } from "../services/adminService";
 import { AdminLogs } from "../components/logs/AdminLogs";
 import { AdminPricing } from "../components/pricing/AdminPricing";
 import { AdminSpaces } from "../components/spaces/AdminSpaces";
