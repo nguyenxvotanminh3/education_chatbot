@@ -1,4 +1,5 @@
 import apiClient from "../../../core/api/axios";
+import axios from "axios";
 
 export interface AdminSubscription {
   id: string;
@@ -250,6 +251,68 @@ export const adminService = {
     payload: { title?: string; content?: string }
   ): Promise<{ success: boolean; page: StaticPageSummary }> {
     const response = await apiClient.put(`/pages/${id}`, payload);
+    return response.data;
+  },
+
+  /**
+   * Get all documents from external API
+   */
+  async getAllDocuments(params?: {
+    page?: number;
+    page_size?: number;
+  }): Promise<{
+    documents: any[];
+    pagination: {
+      total: number;
+      page: number;
+      page_size: number;
+      total_pages: number;
+      has_next: boolean;
+      has_prev: boolean;
+    };
+  }> {
+    const response = await axios.get("http://66.116.199.129:8000/list", {
+      params,
+    });
+    return response.data;
+  },
+
+  /**
+   * Upload PDF document to external API
+   */
+  async uploadDocument(data: {
+    file: File;
+    document_name: string;
+    school_name: string;
+    standard: string;
+    subject: string;
+  }): Promise<{ success: boolean; message?: string; [key: string]: any }> {
+    const formData = new FormData();
+    formData.append("file", data.file);
+    formData.append("document_name", data.document_name);
+    formData.append("school_name", data.school_name);
+    formData.append("standard", data.standard);
+    formData.append("subject", data.subject);
+
+    const response = await axios.post(
+      "http://66.116.199.129:8000/upload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
+
+  /**
+   * Delete document from external API
+   */
+  async deleteDocument(documentId: string): Promise<{ success: boolean; message?: string; [key: string]: any }> {
+    const response = await axios.delete(
+      `http://66.116.199.129:8000/delete/${documentId}`
+    );
     return response.data;
   },
 };

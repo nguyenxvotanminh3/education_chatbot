@@ -5,6 +5,11 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  preview: {
+    host: true, // cho phép truy cập từ ngoài
+    port: 5173,
+    allowedHosts: ['easyschool.ai', 'www.easyschool.ai'],
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -14,7 +19,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:3030",
+        target: "http://localhost:8080",
         changeOrigin: true,
         secure: false,
       },

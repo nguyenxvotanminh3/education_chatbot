@@ -35,7 +35,7 @@ jobs:
             if pm2 list | grep -q "education_react"; then
               pm2 restart education_react
             else
-              pm2 start "pnpm preview -- --host 0.0.0.0 --port 5173" --name education_react
+              pm2 start "pnpm vite preview -- --host 0.0.0.0 --port 5173" --name education_react
             fi
 
             pm2 save
