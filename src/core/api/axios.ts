@@ -1,5 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getCookie } from "../utils/cookie";
+import { store } from "../store";
+import { clearAuth } from "../../features/auth/store/authSlice";
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL || "/api",
@@ -67,7 +69,21 @@ apiClient.interceptors.response.use(
       // If no token, this might be a guest request - don't try to refresh
       if (!hasToken) {
         // Guest users don't have tokens, so 401 is expected for some endpoints
-        // But chat endpoint should allow guest, so just reject the error
+        // But if we're on a protected route, clear any stale auth state
+        const path = window.location.pathname;
+        const isProtectedRoute =
+          path.startsWith("/home") ||
+          path.startsWith("/console") ||
+          path.startsWith("/app") ||
+          path.startsWith("/profile") ||
+          path.startsWith("/settings") ||
+          path.startsWith("/library");
+
+        if (isProtectedRoute) {
+          // Clear any stale auth state
+          store.dispatch(clearAuth());
+        }
+
         return Promise.reject(error);
       }
 
@@ -128,20 +144,24 @@ apiClient.interceptors.response.use(
         throw new Error("No refresh token");
       } catch (refreshError) {
         processQueue(refreshError as AxiosError, null);
-        // Redirect to login if refresh fails
-        const path = window.location.pathname;
-        const requiresAuth =
-          path.startsWith("/home") || path.startsWith("/console");
-        if (requiresAuth) {
-          if (typeof window !== "undefined") {
-            const { removeCookie } = await import("../utils/cookie");
-            removeCookie("access_token", { path: "/" });
-            removeCookie("refresh_token", { path: "/" });
-            localStorage.removeItem("access_token");
-            localStorage.removeItem("refresh_token");
-          }
-          window.location.href = "/login";
+
+        // Clear auth state in Redux and storage
+        if (typeof window !== "undefined") {
+          const { removeCookie } = await import("../utils/cookie");
+          removeCookie("access_token", { path: "/" });
+          removeCookie("refresh_token", { path: "/" });
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+
+          // Dispatch clearAuth action to clear Redux state immediately
+          // This ensures sidebar and other auth-dependent UI elements are hidden
+          store.dispatch(clearAuth());
+
+          // Redirect to home page (public route) immediately
+          // Use replace to avoid adding to history
+          window.location.replace("/");
         }
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

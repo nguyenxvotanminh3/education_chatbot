@@ -103,6 +103,13 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    clearAuth: (state) => {
+      // Clear auth state immediately without API call
+      state.user = null;
+      state.isAuthenticated = false;
+      state.accessToken = null;
+      state.refreshToken = null;
+    },
     setCredentials: (
       state,
       action: PayloadAction<{
@@ -266,7 +273,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, setCredentials } = authSlice.actions;
+export const { clearError, clearAuth, setCredentials } = authSlice.actions;
 // Export reducer separately to avoid initialization issues
 export const authReducer = authSlice.reducer;
 export default authSlice.reducer;
