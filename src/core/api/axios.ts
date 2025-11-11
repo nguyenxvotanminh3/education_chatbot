@@ -1,7 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getCookie } from "../utils/cookie";
-import { store } from "../store";
-import { clearAuth } from "../../features/auth/store/authSlice";
+import { clearAuthState, clearAuthStorage } from "../utils/authHelper";
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL || "/api",
@@ -80,8 +79,11 @@ apiClient.interceptors.response.use(
           path.startsWith("/library");
 
         if (isProtectedRoute) {
-          // Clear any stale auth state
-          store.dispatch(clearAuth());
+          // Clear any stale auth state using helper to avoid circular dependency
+          clearAuthState();
+          clearAuthStorage().catch(() => {
+            // Ignore errors in clearing storage
+          });
         }
 
         return Promise.reject(error);
@@ -147,15 +149,9 @@ apiClient.interceptors.response.use(
 
         // Clear auth state in Redux and storage
         if (typeof window !== "undefined") {
-          const { removeCookie } = await import("../utils/cookie");
-          removeCookie("access_token", { path: "/" });
-          removeCookie("refresh_token", { path: "/" });
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-
-          // Dispatch clearAuth action to clear Redux state immediately
-          // This ensures sidebar and other auth-dependent UI elements are hidden
-          store.dispatch(clearAuth());
+          // Clear storage and state
+          await clearAuthStorage();
+          clearAuthState();
 
           // Redirect to home page (public route) immediately
           // Use replace to avoid adding to history
