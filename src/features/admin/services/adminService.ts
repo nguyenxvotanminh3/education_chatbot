@@ -272,9 +272,12 @@ export const adminService = {
       has_prev: boolean;
     };
   }> {
-    const response = await axios.get(process.env.VITE_PYTHON_URL + "/list", {
-      params,
-    });
+    const response = await axios.get(
+      import.meta.env.VITE_PYTHON_URL + "/list",
+      {
+        params,
+      }
+    );
     return response.data;
   },
 
@@ -296,7 +299,7 @@ export const adminService = {
     formData.append("subject", data.subject);
 
     const response = await axios.post(
-      process.env.VITE_PYTHON_URL + "/upload",
+      import.meta.env.VITE_PYTHON_URL + "/upload",
       formData,
       {
         headers: {
@@ -314,7 +317,7 @@ export const adminService = {
     documentId: string
   ): Promise<{ success: boolean; message?: string; [key: string]: any }> {
     const response = await axios.delete(
-      process.env.VITE_PYTHON_URL + `/delete/${documentId}`
+      import.meta.env.VITE_PYTHON_URL + `/delete/${documentId}`
     );
     return response.data;
   },
