@@ -106,10 +106,32 @@ const ChatPage = () => {
     string,
     string
   > | null>(null);
-  // Note: sessionId is now handled entirely by backend
-  // - For authenticated users: sessionId is stored in conversation in database
-  // - For guest users: Backend manages sessionId internally, frontend doesn't need to track it
-  // We removed localStorage sessionId tracking to avoid confusion with conversationId
+  // Helper function to get guest sessionId from localStorage by conversationId
+  const getGuestSessionId = (
+    conversationId: string | null | undefined
+  ): string | null => {
+    if (!conversationId || typeof window === "undefined") return null;
+    try {
+      const key = `guest_session_id_${conversationId}`;
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  };
+
+  // Helper function to save guest sessionId to localStorage by conversationId
+  const saveGuestSessionId = (
+    conversationId: string | null | undefined,
+    sessionId: string | null
+  ): void => {
+    if (!conversationId || !sessionId || typeof window === "undefined") return;
+    try {
+      const key = `guest_session_id_${conversationId}`;
+      localStorage.setItem(key, sessionId);
+    } catch {
+      // Ignore localStorage errors
+    }
+  };
 
   // Guest session ID (stored in localStorage)
   const [guestSessionId, setGuestSessionId] = useState<string | null>(() => {
@@ -611,13 +633,21 @@ const ChatPage = () => {
       (!isAuthenticated ? guestSessionId : selectedConversationId) ||
       undefined;
 
-    // Get sessionId from current conversation (for authenticated users only)
-    // NOTE: Backend will automatically load session_id from conversation in database if conversationId is provided
-    // For guest users: Backend manages sessionId internally, we don't send it from frontend
-    // Backend will send null to External API for first-time guest chats, External API will create new session_id
-    const sessionIdForRequest = isAuthenticated
-      ? currentConversation?.sessionId || undefined
-      : undefined; // Guest users: Don't send sessionId, let backend handle it
+    // Get sessionId from current conversation (for authenticated users)
+    // For guest users: Get sessionId from localStorage based on conversationId
+    // NOTE: Backend will use this sessionId for guest users, or create new one if not provided
+    let sessionIdForRequest: string | undefined = undefined;
+    if (isAuthenticated) {
+      sessionIdForRequest = currentConversation?.sessionId || undefined;
+    } else {
+      // For guest users: Get sessionId from localStorage using conversationId as key
+      // First chat: sessionId will be undefined, backend will create new one
+      // Subsequent chats: sessionId will be retrieved from localStorage
+      if (finalConversationId) {
+        sessionIdForRequest =
+          getGuestSessionId(finalConversationId) || undefined;
+      }
+    }
 
     const apiData = {
       userInput: content,
@@ -656,7 +686,6 @@ const ChatPage = () => {
         // Guest messages are stored in local state only (no backend conversation)
         // conversationId is used for frontend state tracking
         // Backend cookie (ci) is used for rate limiting
-        // Backend manages sessionId internally, we don't need to track it in frontend
         // Update conversationId from response if backend returned one
         if (
           response.chatHistoryId &&
@@ -665,8 +694,11 @@ const ChatPage = () => {
           setGuestSessionId(response.chatHistoryId);
           localStorage.setItem("guest_session_id", response.chatHistoryId);
         }
-        // NOTE: We don't save sessionId to localStorage for guest users
-        // Backend will manage sessionId internally and send it to External API
+        // Save sessionId from response to localStorage using conversationId as key
+        // This allows us to send sessionId in subsequent chats for the same conversation
+        if (response.sessionId && finalConversationId) {
+          saveGuestSessionId(finalConversationId, response.sessionId);
+        }
       } else if (selectedConversationId) {
         // For authenticated users: update local state and sync with backend
         addMessageToConversation(selectedConversationId, assistantMessage);
@@ -770,12 +802,18 @@ const ChatPage = () => {
     const finalSchoolName =
       currentConversation?.schoolName || guestSchoolName || undefined;
 
-    // Get sessionId from current conversation (for authenticated users only)
-    // NOTE: Backend will automatically load session_id from conversation in database if conversationId is provided
-    // For guest users: Backend manages sessionId internally, we don't send it from frontend
-    const sessionIdForRequest = isAuthenticated
-      ? currentConversation?.sessionId || undefined
-      : undefined; // Guest users: Don't send sessionId, let backend handle it
+    // Get sessionId from current conversation (for authenticated users)
+    // For guest users: Get sessionId from localStorage based on conversationId
+    let sessionIdForRequest: string | undefined = undefined;
+    if (isAuthenticated) {
+      sessionIdForRequest = currentConversation?.sessionId || undefined;
+    } else {
+      // For guest users: Get sessionId from localStorage using conversationId as key
+      if (finalConversationId) {
+        sessionIdForRequest =
+          getGuestSessionId(finalConversationId) || undefined;
+      }
+    }
 
     // Prepare API call with the same user input
     const apiData = {
@@ -812,7 +850,10 @@ const ChatPage = () => {
         prev.map((msg) => (msg.id === messageId ? regeneratedMessage : msg))
       );
 
-      // For guest users: Backend manages sessionId internally, we don't need to track it
+      // For guest users: Save sessionId from response to localStorage
+      if (!isAuthenticated && response.sessionId && finalConversationId) {
+        saveGuestSessionId(finalConversationId, response.sessionId);
+      }
 
       // Update conversation if authenticated
       if (selectedConversationId && currentConversation) {
