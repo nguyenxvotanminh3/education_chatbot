@@ -106,41 +106,14 @@ const ChatPage = () => {
     string,
     string
   > | null>(null);
-  // Helper function to get guest sessionId from localStorage by conversationId
-  const getGuestSessionId = (
-    conversationId: string | null | undefined
-  ): string | null => {
-    if (!conversationId || typeof window === "undefined") return null;
-    try {
-      const key = `guest_session_id_${conversationId}`;
-      return localStorage.getItem(key);
-    } catch {
-      return null;
-    }
-  };
+  // Guest conversation ID (for frontend state tracking, not persisted)
+  const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
 
-  // Helper function to save guest sessionId to localStorage by conversationId
-  const saveGuestSessionId = (
-    conversationId: string | null | undefined,
-    sessionId: string | null
-  ): void => {
-    if (!conversationId || !sessionId || typeof window === "undefined") return;
-    try {
-      const key = `guest_session_id_${conversationId}`;
-      localStorage.setItem(key, sessionId);
-    } catch {
-      // Ignore localStorage errors
-    }
-  };
-
-  // Guest session ID (stored in localStorage)
-  const [guestSessionId, setGuestSessionId] = useState<string | null>(() => {
-    // Load guest session ID from localStorage on mount
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("guest_session_id");
-    }
-    return null;
-  });
+  // Guest sessionId from response (stored in memory only, lost on refresh)
+  // This is the sessionId returned from External API, used for subsequent chats in the same session
+  const [guestSessionIdFromResponse, setGuestSessionIdFromResponse] = useState<
+    string | null
+  >(null);
 
   // Load public settings for UI-managed content (e.g., quick suggestions)
   useEffect(() => {
@@ -634,19 +607,17 @@ const ChatPage = () => {
       undefined;
 
     // Get sessionId from current conversation (for authenticated users)
-    // For guest users: Get sessionId from localStorage based on conversationId
+    // For guest users: Get sessionId from state (memory only, lost on refresh)
     // NOTE: Backend will use this sessionId for guest users, or create new one if not provided
     let sessionIdForRequest: string | undefined = undefined;
     if (isAuthenticated) {
       sessionIdForRequest = currentConversation?.sessionId || undefined;
     } else {
-      // For guest users: Get sessionId from localStorage using conversationId as key
+      // For guest users: Use sessionId from state (from previous response)
       // First chat: sessionId will be undefined, backend will create new one
-      // Subsequent chats: sessionId will be retrieved from localStorage
-      if (finalConversationId) {
-        sessionIdForRequest =
-          getGuestSessionId(finalConversationId) || undefined;
-      }
+      // Subsequent chats: sessionId will be from state (from previous response)
+      // After refresh: sessionId will be undefined again (state is lost)
+      sessionIdForRequest = guestSessionIdFromResponse || undefined;
     }
 
     const apiData = {
@@ -692,12 +663,11 @@ const ChatPage = () => {
           response.chatHistoryId !== guestSessionId
         ) {
           setGuestSessionId(response.chatHistoryId);
-          localStorage.setItem("guest_session_id", response.chatHistoryId);
         }
-        // Save sessionId from response to localStorage using conversationId as key
-        // This allows us to send sessionId in subsequent chats for the same conversation
-        if (response.sessionId && finalConversationId) {
-          saveGuestSessionId(finalConversationId, response.sessionId);
+        // Save sessionId from response to state (memory only, lost on refresh)
+        // This allows us to send sessionId in subsequent chats for the same session
+        if (response.sessionId) {
+          setGuestSessionIdFromResponse(response.sessionId);
         }
       } else if (selectedConversationId) {
         // For authenticated users: update local state and sync with backend
@@ -803,16 +773,13 @@ const ChatPage = () => {
       currentConversation?.schoolName || guestSchoolName || undefined;
 
     // Get sessionId from current conversation (for authenticated users)
-    // For guest users: Get sessionId from localStorage based on conversationId
+    // For guest users: Get sessionId from state (memory only, lost on refresh)
     let sessionIdForRequest: string | undefined = undefined;
     if (isAuthenticated) {
       sessionIdForRequest = currentConversation?.sessionId || undefined;
     } else {
-      // For guest users: Get sessionId from localStorage using conversationId as key
-      if (finalConversationId) {
-        sessionIdForRequest =
-          getGuestSessionId(finalConversationId) || undefined;
-      }
+      // For guest users: Use sessionId from state (from previous response)
+      sessionIdForRequest = guestSessionIdFromResponse || undefined;
     }
 
     // Prepare API call with the same user input
@@ -850,9 +817,9 @@ const ChatPage = () => {
         prev.map((msg) => (msg.id === messageId ? regeneratedMessage : msg))
       );
 
-      // For guest users: Save sessionId from response to localStorage
-      if (!isAuthenticated && response.sessionId && finalConversationId) {
-        saveGuestSessionId(finalConversationId, response.sessionId);
+      // For guest users: Save sessionId from response to state (memory only, lost on refresh)
+      if (!isAuthenticated && response.sessionId) {
+        setGuestSessionIdFromResponse(response.sessionId);
       }
 
       // Update conversation if authenticated
