@@ -121,7 +121,7 @@ const SpaceStarter: React.FC = () => {
 
   return (
     <div
-      className={`relative w-full mx-auto rounded-2xl overflow-hidden dark:bg-card/70 scrollbar-none ${
+      className={`relative w-full mx-auto rounded-2xl dark:bg-card/70 scrollbar-none ${
         isMobile ? "max-w-[480px]" : "max-w-5xl"
       }`}
       style={containerStyle}
@@ -152,14 +152,18 @@ const SpaceStarter: React.FC = () => {
         {/* Responsive grid */}
         <div
           className={`grid ${
-            isMobile ? "grid-cols-2 gap-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5"
+            isMobile
+              ? "grid-cols-2 gap-2"
+              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5"
           } w-full`}
         >
           {displayedSpaces.map((space, idx) => (
             <button
               key={idx}
               className={`group rounded-xl bg-card/70 dark:bg-card/50 hover:bg-card/90 dark:hover:bg-card/65 transition-all flex gap-3 sm:gap-2.5 shadow-sm dark:shadow-md text-left focus:outline-none focus:ring-2 focus:ring-primary/50 active:scale-[0.99] ${
-                isMobile ? "p-3 min-h-[80px]" : "p-4 sm:p-3.5 md:p-4 min-h-[96px]"
+                isMobile
+                  ? "p-3 min-h-[80px]"
+                  : "p-4 sm:p-3.5 md:p-4 min-h-[96px]"
               }`}
               onClick={() => {
                 const detail = space.content || space.title;
