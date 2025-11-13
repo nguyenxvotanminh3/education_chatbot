@@ -55,6 +55,14 @@ const ChatPage = () => {
   const [currentMessages, setCurrentMessages] = useState<NewMessage[]>([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  
+  // Clear messages immediately when authentication state changes to false
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCurrentMessages([]);
+      setIsStreaming(false);
+    }
+  }, [isAuthenticated]);
   const [model, setModel] = useState("Government School");
   const [tools, setTools] = useState<ConversationTools>({
     web: false,
@@ -170,6 +178,10 @@ const ChatPage = () => {
 
   // Track previous conversation ID to detect conversation switches
   const prevConversationIdRef = useRef<string | null>(null);
+  // Track previous URL to prevent unnecessary navigation
+  const prevUrlRef = useRef<string | null>(null);
+  // Flag to prevent recursive updates
+  const isSyncingRef = useRef(false);
 
   // Update messages when conversation ID changes (user switches conversations)
   // This prevents overwriting currentMessages when Redux state updates for the same conversation
@@ -188,11 +200,16 @@ const ChatPage = () => {
       }
 
       // Update URL if conversation has messages and URL doesn't match
+      // Only navigate if not currently syncing to prevent recursive loop
+      const expectedUrl = `/app/${selectedConversation.id}`;
       if (
         selectedConversation.messages.length > 0 &&
-        conversationIdFromUrl !== selectedConversation.id
+        conversationIdFromUrl !== selectedConversation.id &&
+        !isSyncingRef.current &&
+        prevUrlRef.current !== expectedUrl
       ) {
-        navigate(`/app/${selectedConversation.id}`, { replace: true });
+        prevUrlRef.current = expectedUrl;
+        navigate(expectedUrl, { replace: true });
       }
     } else if (isAuthenticated) {
       // Only clear messages for authenticated users
@@ -203,7 +220,13 @@ const ChatPage = () => {
       }
 
       // Navigate to /app if no conversation selected and URL has ID
-      if (conversationIdFromUrl) {
+      // Only navigate if not currently syncing to prevent recursive loop
+      if (
+        conversationIdFromUrl &&
+        !isSyncingRef.current &&
+        prevUrlRef.current !== "/app"
+      ) {
+        prevUrlRef.current = "/app";
         navigate("/app", { replace: true });
       }
     }
@@ -212,6 +235,7 @@ const ChatPage = () => {
     isAuthenticated,
     conversationIdFromUrl,
     navigate,
+    selectedConversation?.messages.length,
   ]);
 
   // Update tools and memory when conversation changes (separate from messages to avoid overwriting)
@@ -258,12 +282,21 @@ const ChatPage = () => {
   }, [isAuthenticated, conversationIdFromUrl, navigate, selectConversation]);
 
   // Load conversation from URL if ID is provided
+  // This syncs URL -> Redux state (one direction only)
   useEffect(() => {
+    // Skip if already syncing to prevent recursive updates
+    if (isSyncingRef.current) {
+      return;
+    }
+
     if (
       conversationIdFromUrl &&
       isAuthenticated &&
       conversationIdFromUrl !== selectedConversationId
     ) {
+      // Set syncing flag to prevent recursive navigation
+      isSyncingRef.current = true;
+      
       // Check if conversation exists in Redux store
       const conversationFromStore = conversations.find(
         (c) => c.id === conversationIdFromUrl
@@ -275,6 +308,24 @@ const ChatPage = () => {
         // For now, just select it (will be loaded when conversations are fetched)
         selectConversation(conversationIdFromUrl);
       }
+      
+      // Clear syncing flag after navigation completes
+      // Use requestAnimationFrame to ensure state updates are processed
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          isSyncingRef.current = false;
+        }, 50);
+      });
+    } else if (!conversationIdFromUrl && selectedConversationId && isAuthenticated) {
+      // If URL has no ID but we have a selected conversation, clear selection
+      // This handles the case when user navigates to /app
+      isSyncingRef.current = true;
+      selectConversation(null);
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          isSyncingRef.current = false;
+        }, 50);
+      });
     }
   }, [
     conversationIdFromUrl,

@@ -114,6 +114,15 @@ const conversationSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    clearConversations: (state) => {
+      state.conversations = [];
+      state.selectedConversationId = null;
+      state.isLoading = false;
+      state.isCreating = false;
+      state.isUpdating = false;
+      state.isDeleting = false;
+      state.error = null;
+    },
     // Optimistic update for local state (before backend sync)
     addMessageToConversation: (
       state,
@@ -257,6 +266,7 @@ const conversationSlice = createSlice({
 export const {
   setSelectedConversationId,
   clearError,
+  clearConversations,
   addMessageToConversation,
   updateConversationLocal,
 } = conversationSlice.actions;

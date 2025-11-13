@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch } from '../../../core/store/hooks'
-import { logout } from '../../auth/store/authSlice'
+import { logout, clearAuth } from '../../auth/store/authSlice'
+import { clearConversations } from '../../chat/store/conversationSlice'
 
 interface AccountMenuProps {
   userName: string
@@ -14,17 +15,23 @@ const AccountMenu = ({ userName, plan }: AccountMenuProps) => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     if (isLoggingOut) return
     setIsLoggingOut(true)
-    try {
-      await dispatch(logout()).unwrap()
-    } catch (_) {
-      // ignore mock errors
-    } finally {
-      setIsLoggingOut(false)
-      navigate('/login', { replace: true })
-    }
+    
+    // Clear all state immediately (optimistic update)
+    dispatch(clearAuth())
+    dispatch(clearConversations())
+    
+    // Navigate immediately
+    navigate('/login', { replace: true })
+    
+    // Call logout API in background (fire and forget)
+    dispatch(logout()).catch(() => {
+      // Ignore errors - auth state already cleared
+    })
+    
+    setIsLoggingOut(false)
   }
 
   return (

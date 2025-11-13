@@ -31,7 +31,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../core/store/hooks";
-import { logout } from "../../auth/store/authSlice";
+import { logout, clearAuth } from "../../auth/store/authSlice";
+import { clearConversations } from "../store/conversationSlice";
 import { useConversations } from "../hooks/useConversations";
 import {
   User,
@@ -378,7 +379,7 @@ const Sidebar = ({
             <img
               src={logoBlack}
               alt="Easy School.ai Logo"
-              className={`h-10 w-auto ${isDark ? "brightness-0 invert" : ""}`}
+              className={`h-[120px] w-auto ${isDark ? "brightness-0 invert" : ""}`}
             />
           ) : (
             <img
@@ -728,8 +729,15 @@ const Sidebar = ({
 
                 <DropdownMenuItem
                   onClick={() => {
-                    dispatch(logout());
+                    // Clear all state immediately (optimistic update)
+                    dispatch(clearAuth());
+                    dispatch(clearConversations());
+                    // Navigate immediately
                     navigate("/login", { replace: true });
+                    // Call logout API in background (fire and forget)
+                    dispatch(logout()).catch(() => {
+                      // Ignore errors - auth state already cleared
+                    });
                   }}
                   className="flex items-center gap-3 px-4 py-2.5 cursor-pointer focus:bg-gray-50 dark:focus:bg-gray-700/50 text-gray-700 dark:text-gray-200"
                 >

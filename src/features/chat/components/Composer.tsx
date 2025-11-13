@@ -64,12 +64,21 @@ const Composer = ({
       const isMobile = window.innerWidth < 640;
 
       if (isMobile) {
-        // On mobile: always keep single line height, no wrap
-        const singleLineHeight = compact ? "44px" : "52px";
-        textareaRef.current.style.height = singleLineHeight;
-        textareaRef.current.style.overflowY = "hidden";
-        textareaRef.current.style.overflowX = "auto";
-        textareaRef.current.style.whiteSpace = "nowrap";
+        // On mobile: allow wrap and auto-resize with max height
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.overflowY = "auto";
+        textareaRef.current.style.overflowX = "visible";
+        textareaRef.current.style.whiteSpace = "normal";
+        
+        const minHeight = compact ? "44px" : "52px";
+        const maxHeight = "200px";
+        const scrollHeight = textareaRef.current.scrollHeight;
+        
+        if (scrollHeight <= parseInt(minHeight)) {
+          textareaRef.current.style.height = minHeight;
+        } else {
+          textareaRef.current.style.height = `${Math.min(scrollHeight, parseInt(maxHeight))}px`;
+        }
       } else {
         // On desktop: auto-resize based on content, allow wrap
         textareaRef.current.style.height = "auto";
@@ -97,12 +106,21 @@ const Composer = ({
       if (textareaRef.current) {
         const isMobile = window.innerWidth < 640;
         if (isMobile) {
-          // On mobile: single line, no wrap
-          const singleLineHeight = compact ? "44px" : "52px";
-          textareaRef.current.style.height = singleLineHeight;
-          textareaRef.current.style.overflowY = "hidden";
-          textareaRef.current.style.overflowX = "auto";
-          textareaRef.current.style.whiteSpace = "nowrap";
+          // On mobile: allow wrap and auto-resize with max height
+          textareaRef.current.style.height = "auto";
+          textareaRef.current.style.overflowY = "auto";
+          textareaRef.current.style.overflowX = "visible";
+          textareaRef.current.style.whiteSpace = "normal";
+          
+          const minHeight = compact ? "44px" : "52px";
+          const maxHeight = "200px";
+          const scrollHeight = textareaRef.current.scrollHeight;
+          
+          if (scrollHeight <= parseInt(minHeight)) {
+            textareaRef.current.style.height = minHeight;
+          } else {
+            textareaRef.current.style.height = `${Math.min(scrollHeight, parseInt(maxHeight))}px`;
+          }
         } else {
           // On desktop: auto-resize, allow wrap
           textareaRef.current.style.height = "auto";
@@ -150,12 +168,12 @@ const Composer = ({
         // Check if mobile to set appropriate height and style
         const isMobile = window.innerWidth < 640;
         if (isMobile) {
-          // On mobile: reset to single line
-          const singleLineHeight = compact ? "44px" : "52px";
-          textareaRef.current.style.height = singleLineHeight;
-          textareaRef.current.style.overflowY = "hidden";
-          textareaRef.current.style.overflowX = "auto";
-          textareaRef.current.style.whiteSpace = "nowrap";
+          // On mobile: reset to min height but allow wrap
+          const minHeight = compact ? "44px" : "52px";
+          textareaRef.current.style.height = minHeight;
+          textareaRef.current.style.overflowY = "auto";
+          textareaRef.current.style.overflowX = "visible";
+          textareaRef.current.style.whiteSpace = "normal";
         } else {
           // On desktop: reset height
           textareaRef.current.style.height = "auto";
@@ -322,6 +340,7 @@ const Composer = ({
           </div>
         )} */}
 
+          {/* Chat container - wraps text chat and controls */}
           <div className="flex items-center gap-2">
             {/* New Chat button - only visible when compact (no messages) */}
             {onNewChat && compact && (
@@ -347,8 +366,9 @@ const Composer = ({
                 </svg>
               </Button>
             )}
-            {/* Textarea container with inline actions */}
-            <div className="flex-1 relative flex items-center">
+            {/* Chat box container - contains textarea and school + controls */}
+            <div className="flex-1 relative bg-muted/50 border border-border rounded-2xl min-h-[52px] sm:min-h-[60px]">
+              {/* Textarea - with padding bottom to avoid overlap with controls */}
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -361,69 +381,27 @@ const Composer = ({
                 rows={1}
                 className={`w-full ${
                   compact
-                    ? "px-3 py-3 pr-48 sm:pr-48"
-                    : "px-4 py-5 pr-52 sm:pr-52"
-                } bg-muted/50 border border-border rounded-2xl resize-none focus:outline-none focus:ring-0 focus:border-border disabled:opacity-50 disabled:cursor-not-allowed transition-all max-h-[52px] sm:max-h-[320px] leading-[24px] sm:leading-normal`}
+                    ? "px-3 pt-3 pb-12 sm:pb-12"
+                    : "px-4 pt-5 pb-16 sm:pb-14"
+                } bg-transparent resize-none focus:outline-none focus:ring-0 focus:border-border disabled:opacity-50 disabled:cursor-not-allowed transition-all max-h-[200px] sm:max-h-[320px] leading-[24px] sm:leading-normal`}
                 style={{
                   minHeight: compact ? "44px" : "52px",
                 }}
               />
-              {/* Left dock: camera, attach, and school chip pinned to bottom-left - hidden when compact */}
-              {!compact && (
-                <div className="absolute left-2 bottom-2 flex items-center gap-1.5">
-                  {/* <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full border border-border bg-background hover:bg-muted focus:outline-none focus:ring-0 focus-visible:ring-0"
-                  aria-label="Camera"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l2-3h8l2 3h3a2 2 0 0 1 2 2z" />
-                    <circle cx="12" cy="13" r="4" />
-                  </svg>
-                </Button> */}
-                  {/* <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full border border-border bg-background hover:bg-muted focus:outline-none focus:ring-0 focus-visible:ring-0"
-                  aria-label="Attach"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="lucide lucide-paperclip-icon lucide-paperclip"
-                  >
-                    <path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" />
-                  </svg>
-                </Button> */}
-                  {schoolName && (
-                    <div className="ml-1 px-2 py-1 rounded-md bg-background border border-border text-[11px] leading-none text-muted-foreground max-w-[160px] truncate">
+              
+              {/* School + Control div - inside box, at bottom */}
+              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 sm:gap-2 pointer-events-none z-10">
+                {/* School chip - left side */}
+                <div className="flex items-center gap-1.5 pointer-events-auto flex-shrink-0">
+                  {!compact && schoolName && (
+                    <div className="px-2 py-1 rounded-md bg-background border border-border text-[11px] leading-none text-muted-foreground max-w-[120px] sm:max-w-[160px] truncate">
                       {schoolName}
                     </div>
                   )}
                 </div>
-              )}
 
-              {/* Inline controls - center when compact, bottom-right when normal */}
-              {compact ? (
-                <div className="absolute right-0 md:right-2  top-1/2 -translate-y-1/2 flex items-center gap-2 bg-white dark:bg-black">
+                {/* Controls - right side (role toggle + send button) */}
+                <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto flex-shrink-0">
                   {/* Role toggle button with sliding background */}
                   <button
                     type="button"
@@ -432,7 +410,7 @@ const Composer = ({
                         role === "student" ? "teacher" : "student"
                       )
                     }
-                    className="relative px-1 py-1 rounded-md bg-muted/50 border border-border hover:bg-muted transition-colors focus:outline-none focus:ring-0 text-[10px] font-medium leading-tight overflow-hidden"
+                    className="relative px-0.5 sm:px-1 py-1 rounded-md bg-muted/50 border border-border hover:bg-muted transition-colors focus:outline-none focus:ring-0 text-[9px] sm:text-[10px] font-medium leading-tight overflow-hidden"
                     aria-label="Toggle role"
                   >
                     {/* Sliding background */}
@@ -443,9 +421,9 @@ const Composer = ({
                           : "left-1/2 right-1"
                       }`}
                     />
-                    <div className="relative flex items-center gap-1">
+                    <div className="relative flex items-center gap-0.5 sm:gap-1">
                       <span
-                        className={`px-2 py-0.5 rounded transition-colors duration-300 ${
+                        className={`px-1.5 sm:px-2 py-0.5 rounded transition-colors duration-300 ${
                           role === "student"
                             ? "text-white font-semibold"
                             : "text-muted-foreground"
@@ -454,7 +432,7 @@ const Composer = ({
                         Student
                       </span>
                       <span
-                        className={`px-2 py-0.5 rounded transition-colors duration-300 ${
+                        className={`px-1.5 sm:px-2 py-0.5 rounded transition-colors duration-300 ${
                           role === "teacher"
                             ? "text-white font-semibold"
                             : "text-muted-foreground"
@@ -465,17 +443,17 @@ const Composer = ({
                     </div>
                   </button>
 
-                  {/* Send/Stop button inside input */}
+                  {/* Send/Stop button */}
                   {isStreaming && onStop ? (
                     <Button
                       onClick={onStop}
                       variant="destructive"
                       size="icon"
-                      className="h-9 w-9 rounded-full"
+                      className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg"
                       aria-label="Stop generating"
                     >
                       <svg
-                        className="w-4 h-4"
+                        className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
@@ -487,11 +465,11 @@ const Composer = ({
                       onClick={handleSend}
                       disabled={!hasAnyVisibleCharacter || disabled}
                       size="icon"
-                      className="h-9 w-9 rounded-lg bg-black text-white hover:bg-black/90 disabled:opacity-50"
+                      className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-black text-white hover:bg-black/90 disabled:opacity-50"
                       aria-label="Send message"
                     >
                       <svg
-                        className="w-4 h-4"
+                        className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -512,97 +490,7 @@ const Composer = ({
                     </Button>
                   )}
                 </div>
-              ) : (
-                <div className="absolute right-0 md:right-2 bottom-1 md:bottom-2 flex items-center gap-2 bg-white dark:bg-black">
-                  {/* Role toggle button with sliding background */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleRoleChange(
-                        role === "student" ? "teacher" : "student"
-                      )
-                    }
-                    className="relative px-1 py-1 rounded-md bg-muted/50 border border-border hover:bg-muted transition-colors focus:outline-none focus:ring-0 text-[10px] font-medium leading-tight overflow-hidden"
-                    aria-label="Toggle role"
-                  >
-                    {/* Sliding background */}
-                    <span
-                      className={`absolute inset-y-1 rounded transition-all duration-300 ease-in-out bg-black ${
-                        role === "student"
-                          ? "left-1 right-1/2"
-                          : "left-1/2 right-1"
-                      }`}
-                    />
-                    <div className="relative flex items-center gap-1">
-                      <span
-                        className={`px-2 py-0.5 rounded transition-colors duration-300 ${
-                          role === "student"
-                            ? "text-white font-semibold"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        Student
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded transition-colors duration-300 ${
-                          role === "teacher"
-                            ? "text-white font-semibold"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        Teacher
-                      </span>
-                    </div>
-                  </button>
-
-                  {/* Send/Stop button inside input */}
-                  {isStreaming && onStop ? (
-                    <Button
-                      onClick={onStop}
-                      variant="destructive"
-                      size="icon"
-                      className="h-9 w-9 rounded-full"
-                      aria-label="Stop generating"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M6 6h12v12H6z" />
-                      </svg>
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleSend}
-                      disabled={!hasAnyVisibleCharacter || disabled}
-                      size="icon"
-                      className="h-9 w-9 rounded-lg bg-black text-white hover:bg-black/90 disabled:opacity-50"
-                      aria-label="Send message"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 19V5"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="m5 12 7-7 7 7"
-                        />
-                      </svg>
-                    </Button>
-                  )}
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </div>

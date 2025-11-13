@@ -130,12 +130,12 @@ const SpaceStarter: React.FC = () => {
           </button>
         </div> */}
 
-        {/* Mobile: horizontal scroll, Desktop: grid */}
-        <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-2 lg:gap-2.5 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0 -mx-3 sm:mx-0 px-3 sm:px-0 scrollbar-hide">
+        {/* Responsive grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5 w-full">
           {spaces.map((space, idx) => (
             <button
               key={idx}
-              className="group rounded-xl bg-card/70 dark:bg-card/50 hover:bg-card/90 dark:hover:bg-card/65 transition-all p-4 sm:p-3 md:p-3.5 flex gap-3 sm:gap-2 md:gap-2.5 shadow-sm dark:shadow-md  hover:border-border/80 dark:hover:border-border/60 text-left min-h-[100px] sm:min-h-24 md:min-h-28 focus:outline-none focus:ring-2 focus:ring-primary/50 active:scale-[0.98] flex-shrink-0 min-w-[280px] sm:min-w-0 sm:w-auto"
+              className="group rounded-xl border border-border/60 bg-card/70 dark:bg-card/50 hover:bg-card/90 dark:hover:bg-card/65 transition-all p-4 sm:p-3.5 md:p-4 flex gap-3 sm:gap-2.5 shadow-sm dark:shadow-md hover:border-border/80 dark:hover:border-border/60 text-left min-h-[96px] focus:outline-none focus:ring-2 focus:ring-primary/50 active:scale-[0.99]"
               onClick={() => {
                 const detail = space.content || space.title;
                 window.dispatchEvent(
@@ -144,14 +144,14 @@ const SpaceStarter: React.FC = () => {
               }}
               type="button"
             >
-              <div className="text-2xl sm:text-2xl md:text-3xl shrink-0 leading-none self-start mt-0.5">
+              <div className="text-2xl sm:text-[26px] md:text-3xl shrink-0 leading-none self-start mt-0.5">
                 {space.icon}
               </div>
               <div className="min-w-0 flex-1 flex flex-col justify-center">
-                <div className="text-sm sm:text-sm md:text-base font-semibold text-foreground mb-1 sm:mb-0.5 md:mb-1 leading-tight">
+                <div className="text-sm sm:text-[15px] md:text-base font-semibold text-foreground mb-1 sm:mb-0.5 md:mb-1 leading-tight">
                   {space.title}
                 </div>
-                <div className="text-xs sm:text-xs md:text-sm text-foreground/70 dark:text-foreground/60 leading-relaxed line-clamp-2">
+                <div className="text-xs sm:text-[13px] md:text-sm text-foreground/70 dark:text-foreground/60 leading-relaxed">
                   {space.description}
                 </div>
               </div>

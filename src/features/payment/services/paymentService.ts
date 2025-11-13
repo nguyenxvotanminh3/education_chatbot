@@ -42,6 +42,7 @@ export interface SubscriptionHistoryItem {
   accountStatus: string;
   actions: string[];
   subscriptionId: string;
+  
   createdAt: string;
   startDate: string;
   nextBillingDate: string;
