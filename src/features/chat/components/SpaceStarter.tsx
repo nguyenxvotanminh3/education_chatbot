@@ -59,10 +59,21 @@ const SpaceStarter: React.FC = () => {
   const [spaces, setSpaces] = useState<SpaceItem[]>(DEFAULT_SPACES);
   const computeScale = () => {
     if (typeof window === "undefined") return 1;
-    const ratio = Math.min(1, window.innerHeight / 826);
-    return Math.min(1, 0.85 + 0.15 * ratio);
+    const { innerWidth, innerHeight } = window;
+
+    if (innerWidth <= 640) {
+      return 0.95;
+    }
+
+    const heightRatio = innerHeight / 920;
+    const widthRatio = innerWidth / 1280;
+    const ratio = Math.min(heightRatio, widthRatio);
+    return Math.min(1, Math.max(0.78, ratio));
   };
   const [scale, setScale] = useState(computeScale);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth <= 640 : false
+  );
 
   useEffect(() => {
     const handleResize = () => {
@@ -70,6 +81,7 @@ const SpaceStarter: React.FC = () => {
         const next = computeScale();
         return Math.abs(next - prev) > 0.01 ? next : prev;
       });
+      setIsMobile(window.innerWidth <= 640);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -102,9 +114,16 @@ const SpaceStarter: React.FC = () => {
     return style;
   }, [scale]);
 
+  const displayedSpaces = useMemo(
+    () => (isMobile ? spaces.slice(0, 4) : spaces),
+    [isMobile, spaces]
+  );
+
   return (
     <div
-      className="relative w-full max-w-5xl mx-auto rounded-2xl overflow-visible dark:bg-card/70 scrollbar-none"
+      className={`relative w-full mx-auto rounded-2xl overflow-hidden dark:bg-card/70 scrollbar-none ${
+        isMobile ? "max-w-[480px]" : "max-w-5xl"
+      }`}
       style={containerStyle}
     >
       {/* Pastel radial mist overlays */}
@@ -131,11 +150,17 @@ const SpaceStarter: React.FC = () => {
         </div> */}
 
         {/* Responsive grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5 w-full">
-          {spaces.map((space, idx) => (
+        <div
+          className={`grid ${
+            isMobile ? "grid-cols-2 gap-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5"
+          } w-full`}
+        >
+          {displayedSpaces.map((space, idx) => (
             <button
               key={idx}
-              className="group rounded-xl border border-border/60 bg-card/70 dark:bg-card/50 hover:bg-card/90 dark:hover:bg-card/65 transition-all p-4 sm:p-3.5 md:p-4 flex gap-3 sm:gap-2.5 shadow-sm dark:shadow-md hover:border-border/80 dark:hover:border-border/60 text-left min-h-[96px] focus:outline-none focus:ring-2 focus:ring-primary/50 active:scale-[0.99]"
+              className={`group rounded-xl bg-card/70 dark:bg-card/50 hover:bg-card/90 dark:hover:bg-card/65 transition-all flex gap-3 sm:gap-2.5 shadow-sm dark:shadow-md text-left focus:outline-none focus:ring-2 focus:ring-primary/50 active:scale-[0.99] ${
+                isMobile ? "p-3 min-h-[80px]" : "p-4 sm:p-3.5 md:p-4 min-h-[96px]"
+              }`}
               onClick={() => {
                 const detail = space.content || space.title;
                 window.dispatchEvent(

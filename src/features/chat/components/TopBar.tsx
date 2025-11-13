@@ -20,6 +20,8 @@ import AuthDialog from "../../auth/components/AuthDialog";
 import { cn } from "@/lib/utils";
 import { toggleDarkMode } from "../../ui/store/uiSlice";
 import { settingsService } from "../../auth/services/settingsService";
+import modelIconDark from "../../../public/model_icon_dark.png";
+import modelIconLight from "../../../public/model_icon_light.png";
 
 interface TopBarProps {
   currentConversation?: Conversation | null;
@@ -36,7 +38,7 @@ interface TopBarProps {
 }
 
 const TopBar = ({
-  model = "Government School",
+  model = "Easy Government Schools",
   conversationId,
   onModelChange,
   onSettings,
@@ -68,19 +70,27 @@ const TopBar = ({
   };
   return (
     <div className="h-16 min-h-16 bg-background/50 backdrop-blur-sm sticky top-0 z-10">
-      <div className="h-full px-4 flex items-center justify-end gap-3 md:justify-between">
+      <div className="h-full px-2 sm:px-4 flex items-center justify-between gap-2 sm:gap-3 overflow-hidden">
         {/* Left: Model dropdown */}
         {/* Left: Model Selector */}
-        <div className="flex items-center gap-3">
+        <div className={`flex items-center gap-2 sm:gap-3 min-w-0 ${isAuthenticated ? 'pl-14 md:pl-0' : ''}`}>
+          {/* Model icons - only show when not authenticated */}
+          {!isAuthenticated && (
+            <img
+              src={isDark ? modelIconLight : modelIconDark}
+              alt="Model icon"
+              className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 object-contain"
+            />
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="h-9 px-4 text-sm font-medium flex items-center gap-2 border-border/60 hover:bg-muted/70 transition-all duration-200"
+                className="h-9 px-2 sm:px-4 text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2 border-0 hover:bg-muted/70 transition-all duration-200 whitespace-nowrap flex-shrink-0"
               >
-                <span className="text-foreground">{model}</span>
+                <span className="text-foreground truncate max-w-[100px] sm:max-w-none">{model}</span>
                 <svg
-                  className="w-4 h-4 text-muted-foreground"
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={2}
@@ -100,11 +110,11 @@ const TopBar = ({
               className="w-72 shadow-xl rounded-lg border border-border/50 p-1 bg-popover backdrop-blur-sm"
             >
               <DropdownMenuItem
-                key="Government School"
-                onClick={() => onModelChange?.("Government School")}
+                key="Easy Government Schools"
+                onClick={() => onModelChange?.("Easy Government Schools")}
                 className={cn(
                   "flex flex-col items-start py-2.5 px-3.5 cursor-pointer rounded-md transition-colors",
-                  model === "Government School"
+                  model === "Easy Government Schools"
                     ? "bg-accent text-accent-foreground"
                     : "hover:bg-muted/70"
                 )}
@@ -112,7 +122,7 @@ const TopBar = ({
                 <div className="flex items-center justify-between w-full">
                   <div className="flex flex-col items-start">
                     <span className="font-medium">
-                      Government Schools (Public)
+                      Easy Government Schools (Public)
                     </span>
                     <span className="text-xs text-muted-foreground">
                       Unlimited Free
@@ -121,13 +131,13 @@ const TopBar = ({
                 </div>
               </DropdownMenuItem>
               <DropdownMenuItem
-                key="Private School"
+                key="Easy Private Schools"
                 onSelect={(e) => {
                   e.preventDefault();
                 }}
                 className={cn(
                   "py-2.5 px-3.5 rounded-md transition-colors",
-                  model === "Private School"
+                  model === "Easy Private Schools"
                     ? "bg-accent text-accent-foreground"
                     : "hover:bg-muted/70"
                 )}
@@ -136,9 +146,9 @@ const TopBar = ({
                 <div className="flex items-center justify-between gap-2 w-full cursor-default">
                   <div
                     className="flex flex-col items-start flex-1 cursor-pointer"
-                    onClick={() => onModelChange?.("Private School")}
+                    onClick={() => onModelChange?.("Easy Private Schools")}
                   >
-                    <span className="font-medium">Private Schools</span>
+                    <span className="font-medium">Easy Private Schools</span>
                     <span className="text-xs text-muted-foreground">
                       25 Free Chats
                     </span>
@@ -161,12 +171,12 @@ const TopBar = ({
         </div>
 
         {/* Right: Share + Settings or Login/Signup */}
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
           {isAuthenticated ? (
             <>
               <button
                 onClick={() => setShareOpen(true)}
-                className="p-2 md:block hidden rounded-lg hover:bg-muted transition-colors"
+                className="p-2 md:block hidden rounded-lg hover:bg-muted transition-colors flex-shrink-0"
                 aria-label="Share"
               >
                 <svg
@@ -186,7 +196,7 @@ const TopBar = ({
               {/* Theme Toggle */}
               <button
                 onClick={handleThemeToggle}
-                className="p-2 rounded-lg hover:bg-muted transition-colors"
+                className="p-2 rounded-lg hover:bg-muted transition-colors flex-shrink-0"
                 aria-label={
                   isDark ? "Switch to light mode" : "Switch to dark mode"
                 }
@@ -224,7 +234,7 @@ const TopBar = ({
               {onSettings && (
                 <button
                   onClick={onSettings}
-                  className="p-2 md:block hidden rounded-lg hover:bg-muted transition-colors"
+                  className="p-2 md:block hidden rounded-lg hover:bg-muted transition-colors flex-shrink-0"
                   aria-label="Settings"
                 >
                   <svg
@@ -253,13 +263,13 @@ const TopBar = ({
             <>
               <button
                 onClick={() => setAuthModal("login")}
-                className="h-9 px-4 inline-flex items-center rounded-md bg-white text-black text-sm hover:bg-gray-100 whitespace-nowrap border border-border"
+                className="h-9 px-2 sm:px-4 inline-flex items-center rounded-md bg-white text-black text-xs sm:text-sm hover:bg-gray-100 whitespace-nowrap border border-border flex-shrink-0"
               >
                 Log in
               </button>
               <button
                 onClick={() => setAuthModal("signup")}
-                className="h-9 px-4 inline-flex items-center rounded-md bg-black text-white text-sm hover:bg-gray-900 whitespace-nowrap border border-border"
+                className="h-9 px-2 sm:px-4 inline-flex items-center rounded-md bg-black text-white text-xs sm:text-sm hover:bg-gray-900 whitespace-nowrap border border-border flex-shrink-0"
               >
                 Sign up
               </button>

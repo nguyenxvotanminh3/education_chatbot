@@ -47,8 +47,16 @@ const ChatArea = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const computeHeroScale = () => {
     if (typeof window === "undefined") return 1;
-    const ratio = Math.min(1, window.innerHeight / 826);
-    return Math.min(1, 0.85 + 0.15 * ratio);
+    const { innerWidth, innerHeight } = window;
+
+    if (innerWidth <= 640) {
+      return 1;
+    }
+
+    const heightRatio = innerHeight / 920;
+    const widthRatio = innerWidth / 1280;
+    const ratio = Math.min(heightRatio, widthRatio);
+    return Math.min(1, Math.max(0.75, ratio));
   };
   const [heroScale, setHeroScale] = useState(computeHeroScale);
 
@@ -75,19 +83,19 @@ const ChatArea = ({
     return (
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto min-h-0"
+        className={`flex-1 min-h-0 ${
+          isAuthenticated ? "overflow-y-auto" : "overflow-hidden"
+        }`}
         role="log"
         aria-live="polite"
         aria-label="Chat messages"
       >
         <div
-          className={`flex flex-col items-center justify-start pt-3 sm:pt-4 md:pt-6 ${
-            isAuthenticated ? "pb-3 sm:pb-4" : "pb-2 sm:pb-5 md:pb-6"
-          } ${
-            isAuthenticated ? "px-3 sm:px-4" : "px-2 sm:px-3 md:px-4"
-          } text-center min-h-full w-full ${
-            !isAuthenticated ? "justify-between" : ""
-          }`}
+          className={`flex flex-col items-center ${
+            isAuthenticated
+              ? "justify-start min-h-full pb-3 sm:pb-4 px-3 sm:px-4"
+              : "justify-center gap-5 sm:gap-8 md:gap-10 pb-0 px-3 sm:px-4 md:px-6"
+          } pt-3 sm:pt-4 md:pt-6 text-center w-full max-w-5xl mx-auto`}
           style={
             heroScale < 1
               ? {
@@ -129,7 +137,7 @@ const ChatArea = ({
           </div>
 
           {!isAuthenticated && (
-            <div className="w-full mt-auto pt-2 sm:pt-4 md:pt-6 px-1 sm:px-2 md:px-4">
+            <div className="w-full pt-2 sm:pt-4 md:pt-6 px-1 sm:px-2 md:px-4">
               <SpaceStarter />
             </div>
           )}

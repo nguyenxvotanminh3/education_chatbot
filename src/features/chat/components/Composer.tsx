@@ -45,6 +45,7 @@ const Composer = ({
     "student"
   );
   const [modeDialogOpen, setModeDialogOpen] = useState(false);
+  const [isMultiLine, setIsMultiLine] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Use external role if provided, otherwise use internal state
@@ -66,35 +67,49 @@ const Composer = ({
       if (isMobile) {
         // On mobile: allow wrap and auto-resize with max height
         textareaRef.current.style.height = "auto";
-        textareaRef.current.style.overflowY = "auto";
         textareaRef.current.style.overflowX = "visible";
         textareaRef.current.style.whiteSpace = "normal";
         
         const minHeight = compact ? "44px" : "52px";
         const maxHeight = "200px";
         const scrollHeight = textareaRef.current.scrollHeight;
+        const lineHeight = parseInt(getComputedStyle(textareaRef.current).lineHeight) || 24;
+        const numberOfLines = Math.ceil(scrollHeight / lineHeight);
+        
+        // Only show scrollbar if more than 4 lines
+        textareaRef.current.style.overflowY = numberOfLines > 4 ? "auto" : "hidden";
         
         if (scrollHeight <= parseInt(minHeight)) {
           textareaRef.current.style.height = minHeight;
         } else {
           textareaRef.current.style.height = `${Math.min(scrollHeight, parseInt(maxHeight))}px`;
         }
+        
+        // Check if text wraps to multiple lines
+        setIsMultiLine(scrollHeight > lineHeight * 1.5);
       } else {
         // On desktop: auto-resize based on content, allow wrap
         textareaRef.current.style.height = "auto";
-        textareaRef.current.style.overflowY = "auto";
         textareaRef.current.style.overflowX = "visible";
         textareaRef.current.style.whiteSpace = "normal";
 
         if (compact && !input.trim()) {
           // When compact and empty, keep it small but not too small
           textareaRef.current.style.height = "56px";
+          textareaRef.current.style.overflowY = "hidden";
+          setIsMultiLine(false);
         } else {
           // Otherwise, auto-resize based on content
-          textareaRef.current.style.height = `${Math.min(
-            textareaRef.current.scrollHeight,
-            200
-          )}px`;
+          const scrollHeight = textareaRef.current.scrollHeight;
+          const lineHeight = parseInt(getComputedStyle(textareaRef.current).lineHeight) || 24;
+          const numberOfLines = Math.ceil(scrollHeight / lineHeight);
+          
+          // Only show scrollbar if more than 4 lines
+          textareaRef.current.style.overflowY = numberOfLines > 4 ? "auto" : "hidden";
+          textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
+          
+          // Check if text wraps to multiple lines
+          setIsMultiLine(scrollHeight > lineHeight * 1.5);
         }
       }
     }
@@ -108,30 +123,44 @@ const Composer = ({
         if (isMobile) {
           // On mobile: allow wrap and auto-resize with max height
           textareaRef.current.style.height = "auto";
-          textareaRef.current.style.overflowY = "auto";
           textareaRef.current.style.overflowX = "visible";
           textareaRef.current.style.whiteSpace = "normal";
           
           const minHeight = compact ? "44px" : "52px";
           const maxHeight = "200px";
           const scrollHeight = textareaRef.current.scrollHeight;
+          const lineHeight = parseInt(getComputedStyle(textareaRef.current).lineHeight) || 24;
+          const numberOfLines = Math.ceil(scrollHeight / lineHeight);
+          
+          // Only show scrollbar if more than 4 lines
+          textareaRef.current.style.overflowY = numberOfLines > 4 ? "auto" : "hidden";
           
           if (scrollHeight <= parseInt(minHeight)) {
             textareaRef.current.style.height = minHeight;
+            setIsMultiLine(false);
           } else {
             textareaRef.current.style.height = `${Math.min(scrollHeight, parseInt(maxHeight))}px`;
+            // Check if text wraps to multiple lines
+            setIsMultiLine(scrollHeight > lineHeight * 1.5);
           }
         } else {
           // On desktop: auto-resize, allow wrap
           textareaRef.current.style.height = "auto";
-          textareaRef.current.style.overflowY = "auto";
           textareaRef.current.style.overflowX = "visible";
           textareaRef.current.style.whiteSpace = "normal";
           if (textareaRef.current.value.trim()) {
-            textareaRef.current.style.height = `${Math.min(
-              textareaRef.current.scrollHeight,
-              200
-            )}px`;
+            const scrollHeight = textareaRef.current.scrollHeight;
+            const lineHeight = parseInt(getComputedStyle(textareaRef.current).lineHeight) || 24;
+            const numberOfLines = Math.ceil(scrollHeight / lineHeight);
+            
+            // Only show scrollbar if more than 4 lines
+            textareaRef.current.style.overflowY = numberOfLines > 4 ? "auto" : "hidden";
+            textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
+            // Check if text wraps to multiple lines
+            setIsMultiLine(scrollHeight > lineHeight * 1.5);
+          } else {
+            textareaRef.current.style.overflowY = "hidden";
+            setIsMultiLine(false);
           }
         }
       }
@@ -171,13 +200,13 @@ const Composer = ({
           // On mobile: reset to min height but allow wrap
           const minHeight = compact ? "44px" : "52px";
           textareaRef.current.style.height = minHeight;
-          textareaRef.current.style.overflowY = "auto";
+          textareaRef.current.style.overflowY = "hidden";
           textareaRef.current.style.overflowX = "visible";
           textareaRef.current.style.whiteSpace = "normal";
         } else {
           // On desktop: reset height
           textareaRef.current.style.height = "auto";
-          textareaRef.current.style.overflowY = "auto";
+          textareaRef.current.style.overflowY = "hidden";
           textareaRef.current.style.overflowX = "visible";
           textareaRef.current.style.whiteSpace = "normal";
         }
@@ -342,33 +371,42 @@ const Composer = ({
 
           {/* Chat container - wraps text chat and controls */}
           <div className="flex items-center gap-2">
-            {/* New Chat button - only visible when compact (no messages) */}
-            {onNewChat && compact && (
-              <Button
-                onClick={onNewChat}
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full border border-border bg-background hover:bg-muted shrink-0 focus:outline-none focus:ring-0 focus-visible:ring-0"
-                aria-label="New chat"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-              </Button>
-            )}
             {/* Chat box container - contains textarea and school + controls */}
             <div className="flex-1 relative bg-muted/50 border border-border rounded-2xl min-h-[52px] sm:min-h-[60px]">
-              {/* Textarea - with padding bottom to avoid overlap with controls */}
+              {/* Plus button - inside chat box, positioned dynamically */}
+              {/* Show plus button when compact (no messages) - always show until school is selected in current session */}
+              {onNewChat && compact && (
+                <button
+                  onClick={onNewChat}
+                  className={`absolute z-30 pointer-events-auto focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-lg transition-all ${
+                    isMultiLine
+                      ? "bottom-2 left-2"
+                      : input.length > 10
+                      ? "left-3 top-1/2 -translate-y-1/2"
+                      : "left-3 top-3"
+                  }`}
+                  aria-label="New chat"
+                  style={{ zIndex: 30 }}
+                >
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg hover:bg-muted transition-colors bg-background/80 backdrop-blur-sm">
+                    <svg
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-foreground"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </div>
+                </button>
+              )}
+              
+              {/* Textarea - with padding left to avoid overlap with plus button when on left side */}
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -380,9 +418,17 @@ const Composer = ({
                 disabled={disabled || isStreaming}
                 rows={1}
                 className={`w-full ${
+                  compact && !isMultiLine
+                    ? "pl-10 sm:pl-12"
+                    : compact && isMultiLine
+                    ? "px-3"
+                    : compact
+                    ? "px-3"
+                    : "px-4"
+                } ${
                   compact
-                    ? "px-3 pt-3 pb-12 sm:pb-12"
-                    : "px-4 pt-5 pb-16 sm:pb-14"
+                    ? "pt-3 pb-12 sm:pb-12"
+                    : "pt-5 pb-16 sm:pb-14"
                 } bg-transparent resize-none focus:outline-none focus:ring-0 focus:border-border disabled:opacity-50 disabled:cursor-not-allowed transition-all max-h-[200px] sm:max-h-[320px] leading-[24px] sm:leading-normal`}
                 style={{
                   minHeight: compact ? "44px" : "52px",

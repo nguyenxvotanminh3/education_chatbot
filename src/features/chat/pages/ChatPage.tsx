@@ -63,7 +63,7 @@ const ChatPage = () => {
       setIsStreaming(false);
     }
   }, [isAuthenticated]);
-  const [model, setModel] = useState("Government School");
+  const [model, setModel] = useState("Easy Government Schools");
   const [tools, setTools] = useState<ConversationTools>({
     web: false,
     code: false,
@@ -1049,7 +1049,7 @@ const ChatPage = () => {
             className={`fixed md:relative z-20 md:z-auto left-0 top-0 h-full transition-all duration-300 ease-out ${
               isSidebarCollapsed
                 ? "w-[72px] -translate-x-full md:translate-x-0"
-                : "w-[280px] translate-x-0"
+                : "w-[260px] translate-x-0"
             }`}
           >
             <Sidebar
@@ -1147,7 +1147,9 @@ const ChatPage = () => {
             model={model}
             tools={tools}
             memoryEnabled={memoryEnabled}
-            onModelChange={setModel}
+            onModelChange={(nextModel) => {
+              setModel(nextModel);
+            }}
             onToggleTool={handleToggleTool}
             onToggleMemory={handleToggleMemory}
             onNewChat={handleNewChat}
@@ -1207,12 +1209,12 @@ const ChatPage = () => {
 
             {/* Suggestions UNDER the chat box when no messages */}
             {isAuthenticated && currentMessages.length === 0 && (
-              <div className="mx-auto max-w-[900px] px-6 mt-3 pb-4">
+              <div className="mx-auto max-w-[900px] px-6 mt-3 pb-4 hidden sm:block">
                 <h3 className="text-xs font-medium text-muted-foreground mb-3 tracking-wide">
                   GET STARTED WITH AN EXAMPLE BELOW
                 </h3>
                 {/* Mobile: horizontal scroll, Desktop: grid */}
-                <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0 -mx-6 px-6 sm:mx-0 sm:px-0 scrollbar-hide">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {quickSuggestions.map(
                     (
                       suggestion: { text: string; icon?: string },
@@ -1221,7 +1223,7 @@ const ChatPage = () => {
                       <button
                         key={`${suggestion.text}-${i}`}
                         onClick={() => handleSendMessage(suggestion.text)}
-                        className="group relative p-4 rounded-xl bg-card border border-border hover:bg-accent hover:border-primary/50 transition-all text-left cursor-pointer flex-shrink-0 min-w-[280px] sm:min-w-0 sm:w-auto"
+                        className="group relative p-4 rounded-xl bg-card border border-border hover:bg-accent hover:border-primary/50 transition-all text-left cursor-pointer"
                       >
                         <p className="text-sm text-foreground mb-3 pr-8">
                           {suggestion.text}
@@ -1236,13 +1238,13 @@ const ChatPage = () => {
               </div>
             )}
             {/* Footer notice */}
-            <div className="mx-auto max-w-[900px] px-6 pt-4 pb-0 md:pb-4">
-              <p className="text-xs text-muted-foreground text-center leading-relaxed">
+            <div className="mx-auto max-w-[900px] px-4 pt-2 pb-1 md:pb-2">
+              <p className="text-xs text-muted-foreground text-center leading-snug">
                 <span className="block sm:inline">
-                  Edu+ can make mistakes. Check important info.
+                 easyschool.ai can make mistakes. Check important info.
                 </span>{" "}
                 <button
-                  className="underline text-primary hover:text-primary/80 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 rounded px-1"
+                  className="underline text-primary hover:text-primary/80 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 rounded px-0.5"
                   onClick={() => navigate("/cookies")}
                 >
                   Cookie Preferences

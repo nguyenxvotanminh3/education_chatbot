@@ -69,7 +69,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             className={`fixed md:relative z-20 md:z-auto left-0 top-0 h-full transition-all duration-300 ease-out ${
               isSidebarCollapsed
                 ? "w-[72px] -translate-x-full md:translate-x-0"
-                : "w-[280px] translate-x-0"
+                : "w-[260px] translate-x-0"
             }`}
           >
             <Sidebar

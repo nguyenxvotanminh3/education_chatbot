@@ -90,7 +90,7 @@ const UpgradePage = () => {
               onClick={() => setCategory("private")}
               aria-current={category === "private" ? "true" : "false"}
             >
-              Private schools
+              Private Schools
             </button>
           </div>
         </div>

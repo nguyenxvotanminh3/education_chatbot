@@ -733,6 +733,8 @@ export const subjects = [
   "Chemistry",
   "Biology",
   "English",
+  "Hindi",
+  "Gujarati",
   "History",
   "Geography",
   "Literature",

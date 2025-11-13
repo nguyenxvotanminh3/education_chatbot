@@ -55,7 +55,6 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import logoBlack from "../../../public/logo_black.png";
 import modelIconLightMode from "../../../public/model_icon_light.png";
 import modelIconDarkMode from "../../../public/model_icon_dark.png";
 
@@ -373,13 +372,13 @@ const Sidebar = ({
   return (
     <div className="w-full bg-[#f8fafc] text-slate-700 dark:bg-[#111827] dark:text-slate-200 flex flex-col h-screen sticky top-0 border-r border-slate-200/70 dark:border-white/10 transition-[width] duration-200">
       {/* Header */}
-      <div className="pt-4 pb-4">
-        <div className="flex items-center justify-between mb-4 px-3 ">
+      <div className="pt-2 pb-2">
+        <div className="flex items-center justify-between mb-2 px-3 ">
           {!isCollapsed ? (
             <img
-              src={logoBlack}
+              src={isDark ? modelIconLightMode : modelIconDarkMode}
               alt="Easy School.ai Logo"
-              className={`h-[120px] w-auto ${isDark ? "brightness-0 invert" : ""}`}
+              className="h-10 sm:h-12 w-10 sm:w-12 object-contain"
             />
           ) : (
             <img
@@ -680,7 +679,7 @@ const Sidebar = ({
             <DropdownMenuContent
               align="end"
               side="top"
-              className="w-[280px] p-0 rounded-xl bg-white dark:bg-gray-800 border border-slate-200/70 dark:border-white/10 shadow-lg"
+              className="w-[260px] p-0 rounded-xl bg-white dark:bg-gray-800 border border-slate-200/70 dark:border-white/10 shadow-lg"
             >
               {/* User Account Section */}
               <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200/70 dark:border-white/10">
