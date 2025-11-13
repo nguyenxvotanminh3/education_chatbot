@@ -1,4 +1,5 @@
 import { useState } from "react";
+import assistantAvatar from "../../../public/model_icon_dark.png";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -138,20 +139,12 @@ const MessageBubble = ({
     >
       {/* Avatar for assistant */}
       {!isUser && (
-        <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-            isError ? "bg-red-100 dark:bg-red-900/20" : "bg-primary"
-          }`}
-        >
-          <span
-            className={`text-sm font-medium ${
-              isError
-                ? "text-red-600 dark:text-red-400"
-                : "text-primary-foreground"
-            }`}
-          >
-            {isError ? "!" : "AI"}
-          </span>
+        <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden flex items-center justify-center shrink-0 bg-primary/10 border border-border/60">
+          <img
+            src={assistantAvatar}
+            alt="Assistant avatar"
+            className="w-[70%] h-[70%] sm:w-[75%] sm:h-[75%] object-contain"
+          />
         </div>
       )}
 

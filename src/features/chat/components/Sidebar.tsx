@@ -378,13 +378,13 @@ const Sidebar = ({
             <img
               src={isDark ? modelIconLightMode : modelIconDarkMode}
               alt="Easy School.ai Logo"
-              className="h-10 sm:h-12 w-10 sm:w-12 object-contain"
+              className="h-7 sm:h-8 w-7 sm:w-8 object-contain"
             />
           ) : (
             <img
               src={!isDark ? modelIconDarkMode : modelIconLightMode}
               alt="Model Icon"
-              className="w-10 h-10"
+            className="w-7 h-7"
             />
           )}
 

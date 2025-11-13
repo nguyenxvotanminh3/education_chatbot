@@ -22,6 +22,7 @@ interface ComposerProps {
   compact?: boolean;
   onNewChat?: () => void;
   schoolName?: string;
+  onChangeSchool?: () => void;
 }
 
 const Composer = ({
@@ -38,6 +39,7 @@ const Composer = ({
   compact = false,
   onNewChat,
   schoolName,
+  onChangeSchool,
 }: ComposerProps) => {
   const [input, setInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
@@ -255,7 +257,7 @@ const Composer = ({
       <div className="bg-background/50 backdrop-blur-sm relative">
         {/* Context Chips */}
         {(tools?.web || tools?.code || tools?.vision || memoryEnabled) && (
-          <div className="mx-auto max-w-[900px] px-4 pt-2">
+          <div className="mx-auto max-w-[900px] px-3 pt-1">
             <div className="flex items-center gap-2 flex-wrap">
               {tools?.web && (
                 <div className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium flex items-center gap-1">
@@ -340,8 +342,8 @@ const Composer = ({
         )}
 
         <div
-          className={`mx-auto max-w-[900px] px-4 ${
-            compact ? "pt-0 pb-2" : "py-4"
+          className={`mx-auto max-w-[900px] px-3 ${
+            compact ? "pt-0 pb-1" : "py-3"
           } relative`}
         >
           {/* Quick suggestions row - hidden when compact (empty state) */}
@@ -440,9 +442,14 @@ const Composer = ({
                 {/* School chip - left side */}
                 <div className="flex items-center gap-1.5 pointer-events-auto flex-shrink-0">
                   {!compact && schoolName && (
-                    <div className="px-2 py-1 rounded-md bg-background border border-border text-[11px] leading-none text-muted-foreground max-w-[120px] sm:max-w-[160px] truncate">
+                    <button
+                      type="button"
+                      onClick={onChangeSchool}
+                      className="px-2 py-1 rounded-md bg-background border border-border text-[11px] leading-none text-muted-foreground max-w-[140px] sm:max-w-[180px] truncate hover:bg-muted transition-colors"
+                      title="Change school"
+                    >
                       {schoolName}
-                    </div>
+                    </button>
                   )}
                 </div>
 

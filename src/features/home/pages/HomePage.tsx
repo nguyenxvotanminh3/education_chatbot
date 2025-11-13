@@ -25,7 +25,7 @@ const HomePage = () => {
       }`}
     >
       <header className="sticky top-0 z-10 bg-background/50 backdrop-blur-sm border-b border-border/50">
-        <div className="max-w-6xl mx-auto px-4 py-3 sm:py-0 sm:h-14 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-4 sm:py-0 sm:h-16 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="font-semibold text-lg">
             Space<span className="text-primary">+</span>
           </div>
@@ -73,13 +73,15 @@ const HomePage = () => {
           </div>
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-4 py-10 sm:py-12 flex flex-col gap-4">
-        <h1 className="text-3xl font-bold leading-tight text-center sm:text-left">
-          Welcome to Education Chatbot
-        </h1>
-        <p className="text-muted-foreground text-center sm:text-left">
-          Your AI learning assistant.
-        </p>
+      <main className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-14 sm:py-16 lg:py-24 flex flex-col gap-6">
+        <div className="max-w-3xl mx-auto text-center sm:text-left sm:mx-0">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
+            Welcome to Education Chatbot
+          </h1>
+          <p className="mt-4 text-lg sm:text-xl lg:text-2xl text-muted-foreground">
+            Your AI learning assistant.
+          </p>
+        </div>
       </main>
       <AuthDialog
         inline

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useAppSelector } from "../../../core/store/hooks";
 import { toast } from "react-toastify";
@@ -19,13 +19,6 @@ import { chatService } from "../services/chatService";
 import SchoolPickerModal from "../components/SchoolPickerModal";
 import { sessionService } from "../services/sessionService";
 import { useConversations } from "../hooks/useConversations";
-
-const DEFAULT_QUICK_SUGGESTIONS = [
-  { text: "Write a to-do list for a personal project", icon: "👤" },
-  { text: "Generate an email to reply to a job offer", icon: "✉️" },
-  { text: "Summarize this article in one paragraph", icon: "💬" },
-  { text: "How does AI work in a technical capacity", icon: "⚙️" },
-];
 
 const ChatPage = () => {
   const navigate = useNavigate();
@@ -110,10 +103,6 @@ const ChatPage = () => {
   const [pendingSchoolName, setPendingSchoolName] = useState<string | null>(
     null
   );
-  const [publicSettings, setPublicSettings] = useState<Record<
-    string,
-    string
-  > | null>(null);
   // Guest conversation ID (for frontend state tracking, not persisted)
   const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
 
@@ -123,32 +112,6 @@ const ChatPage = () => {
     string | null
   >(null);
 
-  // Load public settings for UI-managed content (e.g., quick suggestions)
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await chatService.getPublicSettings();
-        setPublicSettings(res?.settings ?? null);
-      } catch {
-        // ignore
-      }
-    })();
-  }, []);
-
-  const quickSuggestions = useMemo(() => {
-    if (publicSettings?.chat_quick_suggestions) {
-      try {
-        const parsed = JSON.parse(publicSettings.chat_quick_suggestions);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.filter((item) => item && typeof item.text === "string");
-        }
-      } catch {
-        // ignore parse error
-      }
-    }
-    return DEFAULT_QUICK_SUGGESTIONS;
-  }, [publicSettings]);
-
   // Guest school name (stored in localStorage, linked to guestSessionId)
   const [guestSchoolName, setGuestSchoolName] = useState<string | null>(() => {
     // Load guest school name from localStorage on mount
@@ -157,6 +120,17 @@ const ChatPage = () => {
     }
     return null;
   });
+
+  // Ensure guest session persists across refresh/navigation
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!guestSessionId) {
+      const stored = localStorage.getItem("guest_session_id");
+      if (stored) {
+        setGuestSessionId(stored);
+      }
+    }
+  }, [guestSessionId]);
 
   // Workflow state
   const [workflowStep, setWorkflowStep] = useState<1 | 2 | 3 | null>(null);
@@ -387,6 +361,27 @@ const ChatPage = () => {
     _remember: boolean // Keep for backward compatibility but not used (school is per conversation now)
   ) => {
     const schoolName = school.name;
+
+    // If user changes school, start a new session/conversation
+    if (!isAuthenticated) {
+      const prev = guestSchoolName;
+      if (prev && prev !== schoolName) {
+        // reset guest session and clear messages
+        setGuestSessionId(null);
+        localStorage.removeItem("guest_session_id");
+        setCurrentMessages([]);
+        selectConversation(null);
+        navigate("/app", { replace: true });
+      }
+    } else {
+      const prev = selectedConversation?.schoolName || null;
+      if (prev && prev !== schoolName) {
+        // start a new conversation for a new school
+        selectConversation(null);
+        setCurrentMessages([]);
+        navigate("/app", { replace: true });
+      }
+    }
 
     // Store school name for the conversation that will be created
     setPendingSchoolName(schoolName);
@@ -1180,7 +1175,7 @@ const ChatPage = () => {
 
           {/* Composer and bottom elements container */}
           <div
-            className="flex-shrink-0 pb-4 sm:pb-6 md:pb-4"
+            className="flex-shrink-0 pb-1 sm:pb-2"
             // style={{
             //   paddingBottom: "max(5rem, env(safe-area-inset-bottom, 1.25rem))",
             // }}
@@ -1205,40 +1200,12 @@ const ChatPage = () => {
               compact={isAuthenticated && currentMessages.length === 0}
               onNewChat={handleNewChat}
               schoolName={currentConversation?.schoolName}
+              onChangeSchool={() => setShowSchoolPicker(true)}
             />
 
             {/* Suggestions UNDER the chat box when no messages */}
-            {isAuthenticated && currentMessages.length === 0 && (
-              <div className="mx-auto max-w-[900px] px-6 mt-3 pb-4 hidden sm:block">
-                <h3 className="text-xs font-medium text-muted-foreground mb-3 tracking-wide">
-                  GET STARTED WITH AN EXAMPLE BELOW
-                </h3>
-                {/* Mobile: horizontal scroll, Desktop: grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                  {quickSuggestions.map(
-                    (
-                      suggestion: { text: string; icon?: string },
-                      i: number
-                    ) => (
-                      <button
-                        key={`${suggestion.text}-${i}`}
-                        onClick={() => handleSendMessage(suggestion.text)}
-                        className="group relative p-4 rounded-xl bg-card border border-border hover:bg-accent hover:border-primary/50 transition-all text-left cursor-pointer"
-                      >
-                        <p className="text-sm text-foreground mb-3 pr-8">
-                          {suggestion.text}
-                        </p>
-                        <div className="absolute bottom-3 left-4 text-muted-foreground group-hover:text-primary transition-colors">
-                          <span className="text-sm">{suggestion.icon}</span>
-                        </div>
-                      </button>
-                    )
-                  )}
-                </div>
-              </div>
-            )}
             {/* Footer notice */}
-            <div className="mx-auto max-w-[900px] px-4 pt-2 pb-1 md:pb-2">
+            <div className="mx-auto max-w-[900px] px-3 pt-1 pb-1">
               <p className="text-xs text-muted-foreground text-center leading-snug">
                 <span className="block sm:inline">
                  easyschool.ai can make mistakes. Check important info.
